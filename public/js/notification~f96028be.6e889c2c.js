@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["notification~f96028be"],{"109a":function(n,a,e){"use strict";e.r(a);var t=function(){var n=this,a=n.$createElement,e=n._self._c||a;return e("v-main")},i=[],c=e("f6c4"),o={components:{VMain:c["a"]}},l=o,s=e("2877"),u=e("6544"),r=e.n(u),f=Object(s["a"])(l,t,i,!1,null,null,null);a["default"]=f.exports;r()(f,{VMain:c["a"]})}}]);
-//# sourceMappingURL=notification~f96028be.6e889c2c.js.map
