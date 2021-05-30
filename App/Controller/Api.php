@@ -66,13 +66,23 @@ class Api extends Controller {
             $password = $this->req->Post('password');
             $type     = $this->req->Post('type');
 
-            if($username !== '' && $password !== '' && $type >= 0 && $type <= 5) {
+            if($username !== '' && $password !== '' && $type >= 0 && $type < 4) {
                 // check username and type
                 // if username is found in table get row of data and get password coloum
                 // check if password in database is verified with password from request
 
                 
             }
+        }
+    }
+
+    public function addadmin() {
+        if($this->req?->getMethod() === 'POST') {
+            $fullname   = $this->req?->Post('fullname');
+            $username   = $this->req?->Post('username');
+            $password   = $this->req?->Post('password');
+
+            
         }
     }
 }
