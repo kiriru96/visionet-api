@@ -9,13 +9,21 @@ class Warehouse extends Model {
 
         $id_warehouse = $this->db->insert('warehouse', $fields, $values);
 
-        return $id_warehouse;
+        if($id_warehouse) {
+            return array('status'=> true, 'id'=> $id_warehouse);
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal membuat data.');
+        }
     }
 
     public function deleteWareHouse(int $id_warehouse) {
         $delete_warehouse = $this->db->delete('warehoue', 'id = ?', array($id_warehouse));
 
-        return $delete_warehouse;
+        if($delete_warehouse) {
+            return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal menghapus data.');
+        }
     }
 
     public function editWareHouse(int $id_warehouse, string $name) {
@@ -24,7 +32,11 @@ class Warehouse extends Model {
 
         $update_warehouse = $this->db->update('warehouse', $fields, $values, 'id = '.$id_warehouse);
 
-        return $update_warehouse;
+        if($update_warehouse) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui data.');
+        }
     }
 
     public function listWareHouse(string $order, int $limit, int $index_start) {
@@ -38,6 +50,10 @@ class Warehouse extends Model {
 
         $warehouse = $list_warehouses[0];
 
-        return $warehouse;
+        if($warehouse) {
+            return array('status'=> true, 'data'=> $warehouse);
+        } else {
+            return array('status'=> false, 'msg'=> 'data tidak ditemukan.');
+        }
     }
 }

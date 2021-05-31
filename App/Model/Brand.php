@@ -9,13 +9,21 @@ class Brand extends Model {
 
         $id_brand = $this->db->insert('device_brand', $fields, $values);
 
-        return $id_brand;
+        if($id_brand) {
+            return array('status'=> true, 'id'=> $id_brand);
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal membuat data.');
+        }
     }
 
     public function deleteBrand(int $id_brand) {
         $delete_brand = $this->db->delete('device_brand', 'id = ?', array($id_brand));
 
-        return $delete_brand;
+        if($delete_brand) {
+            return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal menghapus data.');
+        }
     }
 
     public function editBrand(int $id_Brand, string $name) {
@@ -24,7 +32,11 @@ class Brand extends Model {
 
         $update_brand = $this->db->update('device_brand', $fields, $values, 'id = '.$id_brand);
 
-        return $update_brand;
+        if($update_brand) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui data.');
+        }
     }
 
     public function listBrand(string $order, int $limit, int $index_start) {

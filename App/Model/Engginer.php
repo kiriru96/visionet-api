@@ -4,24 +4,28 @@ use System\Model as Model;
 
 class Engginer extends Model {
     public function login(string $username, string $password) {
-        $checkusername = $this->checkAccountEngginerExists($username);
-        if($checkusername) {
-            $password = $checkusername['password'];
+        $engginer = $this->checkAccountEngginerExists($username);
+        
+        if($engginer) {
+            $hash_password = $engginer['password'];
 
-            
-        } else {
-            return array('status'=> false, 'msg'=> 'Username atau password salah.')
+            if(password_verify($password, $hash_password)) {
+                return array('status'=> true, 'data'=> array('id'=> $engginer['id'], 'type'=> 3, 'username'=> $engginer['username'], 'name'=> $engginer['first_name'].' '.$engginer['last_name']));
+            }
         }
+
+        return array('status'=> false, 'msg'=> 'Username atau password salah.');
     }
 
     private function checkAccountEngginerExists($username) {
-        $engginers = $this->db->selectColumns(array('username'), 'engginer', 'username = ?', array($username));
+        $engginers = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password'), 'engginer', 'username = ?', array($username));
 
         return $engginers[0];
     }
 
     public function createEngginer(string $first_name, string $last_name, string $username, string $password, int $location) {
-        $checkusername = $this->checkAccountEngginerExists($username)
+        $checkusername = $this->checkAccountEngginerExists($username);
+
         if($checkusername) {
             return array('status'=> false, 'msg'=> 'username sudah terpakai.');
         } else {

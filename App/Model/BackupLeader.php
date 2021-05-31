@@ -4,29 +4,33 @@ use System\Model as Model;
 
 class Backupleader extends Model {
     public function login(string $username, string $password) {
-        $checkusername = $this->checkAccountBackupLeaderExists($username);
-        if($checkusername) {
-            $password = $checkusername['password'];
+        $backupleader = $this->checkAccountBackupLeaderExists($username);
 
-            
-        } else {
-            return array('status'=> false, 'msg'=> 'Username atau password salah.')
+        if($backupleader) {
+            $hash_password = $backupleader['password'];
+
+            if(password_verify($password, $hash_password)) {
+                return array('status'=> true, 'data'=> array('id'=> $backupleader['id'], 'type'=> 2, 'username'=> $backupleader['username'], 'name'=> $backupleader['first_name'].' '.$backupleader['last_name']));
+            }
         }
+
+        return array('status'=> false, 'msg'=> 'Username atau password salah.');
     }
 
     private function checkAccountBackupLeaderExists($username) {
-        $backupleaders = $this->db->selectColumns(array('username'), 'backupleader', 'username = ?', array($username));
+        $backupleaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password'), 'backupleader', 'username = ?', array($username));
 
         return $backupleaders[0];
     }
 
     public function createBackupLeader(string $first_name, string $last_name, string $username, string $password, int $location) {
-        $checkusername = $this->checkAccountBackupLeaderExists($username)
+        $checkusername = $this->checkAccountBackupLeaderExists($username);
+
         if($checkusername) {
             return array('status'=> false, 'msg'=> 'username sudah terpakai.');
         } else {
             $fields = array('first_name', 'last_name', 'username', 'password', 'location');
-            $values = array($first_name, $last_name, $username, $password, $location);
+            $values = array($first_name, $last_name, $username, password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]), $location);
             
             $backupleader_insert = $this->db->insert('backupleader', $fields, $values);
     

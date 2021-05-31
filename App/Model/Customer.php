@@ -9,13 +9,21 @@ class Customer extends Model {
 
         $id_customer = $this->db->insert('customer', $fields, $values);
 
-        return $id_customer;
+        if($id_customer) {
+            return array('status'=> true, 'id'=> $id_customer);
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal membuat data.');
+        }
     }
 
     public function deleteCustomer(int $id_customer) {
         $delete_customer = $this->db->delete('customer', 'id = ?', array($id_customer));
 
-        return $delete_customer;
+        if($delete_customer) {
+            return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal menghapus data.');
+        }
     }
 
     public function editCustomer(int $id_customer, string $name) {
@@ -24,7 +32,11 @@ class Customer extends Model {
 
         $update_customer = $this->db->update('customer', $fields, $values, 'id = '.$id_customer);
 
-        return $update_customer;
+        if($update_customer) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui data.');
+        }
     }
 
     public function listCustomer(string $order, int $limit, int $index_start) {

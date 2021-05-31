@@ -32,7 +32,6 @@ $route = array(
 $autoload = array(
 	'temp' => 'Template',
 	'jwt' => 'Jwt',
-	'whatsapp' => 'Whatsapp',
 	'email' => 'Email'
 );
 

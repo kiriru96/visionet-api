@@ -9,13 +9,21 @@ class Device extends Model {
 
         $id_device = $this->db->insert('device_name', $fields, $values);
 
-        return $id_device;
+        if($id_device) {
+            return array('status'=> true, 'id'=> $id_device);
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal membuat data.');
+        }
     }
 
     public function deleteDevice(int $id_device) {
         $delete_device = $this->db->delete('device_name', 'id = ?', array($id_device));
 
-        return $delete_device;
+        if($delete_device) {
+            return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal menghapus data.');
+        }
     }
 
     public function editDevice(int $id_device, string $name) {
@@ -24,7 +32,11 @@ class Device extends Model {
 
         $update_device = $this->db->update('device_name', $fields, $values, 'id = '.$id_device);
 
-        return $update_device;
+        if($update_device) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui data.');
+        }
     }
 
     public function listDevice(string $order, int $limit, int $index_start) {

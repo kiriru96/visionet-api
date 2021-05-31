@@ -4,24 +4,28 @@ use System\Model as Model;
 
 class Leader extends Model {
     public function login(string $username, string $password) {
-        $checkusername = $this->checkAccountLeaderExists($username);
-        if($checkusername) {
-            $password = $checkusername['password'];
+        $leader = $this->checkAccountLeaderExists($username);
+        
+        if($leader) {
+            $hash_password = $leader['password'];
 
-            
-        } else {
-            return array('status'=> false, 'msg'=> 'Username atau password salah.')
+            if(password_verify($password, $hash_password)) {
+                return array('status'=> true, 'data'=> array('id'=> $leader['id'], 'type'=> 1, 'username'=> $leader['username'], 'name'=> $leader['first_name'].' '.$leader['last_name']));
+            }
         }
+
+        return array('status'=> false, 'msg'=> 'Username atau password salah.');
     }
 
     private function checkAccountLeaderExists($username) {
-        $leaders = $this->db->selectColumns(array('username'), 'leader', 'username = ?', array($username));
+        $leaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password'), 'leader', 'username = ?', array($username));
 
         return $leaders[0];
     }
 
     public function createLeader(string $first_name, string $last_name, string $username, string $password, int $location) {
-        $checkusername = $this->checkAccountLeaderExists($username)
+        $checkusername = $this->checkAccountLeaderExists($username);
+
         if($checkusername) {
             return array('status'=> false, 'msg'=> 'username sudah terpakai.');
         } else {
