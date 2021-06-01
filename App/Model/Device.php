@@ -3,7 +3,7 @@ namespace App\Model;
 use System\Model as Model;
 
 class Device extends Model {
-    public function addDevice(string $name) {
+    public function addRecord(string $name) {
         $fields = array('name');
         $values = array($name);
 
@@ -16,7 +16,7 @@ class Device extends Model {
         }
     }
 
-    public function deleteDevice(int $id_device) {
+    public function deleteRecord(int $id_device) {
         $delete_device = $this->db->delete('device_name', 'id = ?', array($id_device));
 
         if($delete_device) {
@@ -26,30 +26,38 @@ class Device extends Model {
         }
     }
 
-    public function editDevice(int $id_device, string $name) {
+    public function editRecord(int $id_device, string $name) {
         $fields = array('name');
         $values = array($name);
 
         $update_device = $this->db->update('device_name', $fields, $values, 'id = '.$id_device);
 
         if($update_device) {
-            return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.');
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_device, 'name'=> $name));
         } else {
             return array('status'=> false, 'msg'=> 'gagal memperbaharui data.');
         }
     }
 
-    public function listDevice(string $order, int $limit, int $index_start) {
+    public function listRecord(string $order, int $limit, int $index_start) {
         $list_devices = $this->db->selectColumns(array('id', 'name'), 'device_name', 'ORDER BY '.$order.' LIMIT '.$index_start.','.$limit, array());
 
-        return $list_devices;
+        if($list_devices) {
+            return array('status'=> true, 'data'=> $list_devices);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
     }
 
-    public function getDevice(int $id_device) {
+    public function getRecord(int $id_device) {
         $list_devices = $this->db->selectColumns(array('id', 'name'), 'device_name', 'id = ?', array($id_device));
 
-        $device = $list_devices[0];
-
-        return $device;
+        if($list_devices) {
+            $device = $list_devices[0];
+    
+            return array('status'=> true, 'data'=> $device);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find any data.');
+        }
     }
 }

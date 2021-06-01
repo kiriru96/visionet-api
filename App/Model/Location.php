@@ -3,7 +3,7 @@ namespace App\Model;
 use System\Model as Model;
 
 class Location extends Model {
-    public function addLocation(string $name) {
+    public function addRecord(string $name) {
         $fields = array('name');
         $values = array($name);
 
@@ -16,7 +16,7 @@ class Location extends Model {
         }
     }
 
-    public function deleteLocation(int $id_location) {
+    public function deleteRecord(int $id_location) {
         $delete_location = $this->db->delete('location', 'id = ?', array($id_location));
 
         if($delete_location) {
@@ -26,30 +26,38 @@ class Location extends Model {
         }
     }
 
-    public function editLocation(int $id_location, string $name) {
+    public function editRecord(int $id_location, string $name) {
         $fields = array('name');
         $values = array($name);
 
         $update_location = $this->db->update('location', $fields, $values, 'id = '.$id_location);
 
         if($update_location) {
-            return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.');
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_location, 'name'=> $name));
         } else {
             return array('status'=> false, 'msg'=> 'gagal memperbaharui data.');
         }
     }
 
-    public function listLocation(string $order, int $limit, int $index_start) {
+    public function listRecord(string $order, int $limit, int $index_start) {
         $list_locations = $this->db->selectColumns(array('id', 'name'), 'location', 'ORDER BY '.$order.' LIMIT '.$index_start.','.$limit, array());
 
-        return $list_locations;
+        if($list_locations) {
+            return array('status'=> true, 'data'=> $list_locations);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
     }
 
-    public function getLocation(int $id_location) {
+    public function getRecord(int $id_location) {
         $list_locations = $this->db->selectColumns(array('id', 'name'), 'location', 'id = ?', array($id_location));
 
-        $location = $list_locations[0];
-
-        return $location;
+        if($list_locations) {
+            $location = $list_locations[0];
+    
+            return array('status'=> true, 'data'=> $location);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find any data.');
+        }
     }
 }

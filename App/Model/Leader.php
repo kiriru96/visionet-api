@@ -20,40 +20,62 @@ class Leader extends Model {
     private function checkAccountLeaderExists($username) {
         $leaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password'), 'leader', 'username = ?', array($username));
 
-        return $leaders[0];
+        if($leaders) {
+            return $leaders[0];
+        } else {
+            return null;
+        }
     }
 
-    public function createLeader(string $first_name, string $last_name, string $username, string $password, int $location) {
+    public function addRecord(string $first_name, string $last_name, string $username, string $password, int $location) {
         $checkusername = $this->checkAccountLeaderExists($username);
 
         if($checkusername) {
             return array('status'=> false, 'msg'=> 'username sudah terpakai.');
         } else {
             $fields = array('first_name', 'last_name', 'username', 'password', 'location');
-            $values = array($first_name, $last_name, $username, $password, $location);
+            $values = array($first_name, $last_name, $username, password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]), $location);
             
             $leader_insert = $this->db->insert('leader', $fields, $values);
     
-            return array('status'=> true, 'id'=> $leader_insert);
+            if($leader_insert) {
+                return array('status'=> true, 'id'=> $leader_insert);
+            } else {
+                return array('status'=> false, 'msg'=> 'failed to insert data.');
+            }
         }
     }
 
-    public function editLeader(int $id_leader, string $first_name, string $last_name, string $username, string $password, int $location) {
-        $fields = array('first_name', 'last_name', 'username', 'password', 'location');
-        $values = array($first_name, $last_name, $username, $password, $location);
+    public function editRecord(int $id_leader, string $first_name, string $last_name, string $username, int $location) {
+        $checkusername = $this->checkAccountLeaderExists($username);
 
-        $leader_update = $this->db->update('leader', $fields, $values, 'id = '.$id_leader);
+        if($checkusername) {
+            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        } else {
+            $fields = array('first_name', 'last_name', 'username', 'location');
+            $values = array($first_name, $last_name, $username, $location);
 
-        return $leader_update;
+            $leader_update = $this->db->update('leader', $fields, $values, 'id = '.$id_leader);
+
+            if($leader_update > 0) {
+                return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $id_leader, 'firstname'=> $first_name, 'lastname'=> $last_name, 'username'=> $username));
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
+            }
+        }
     }
 
-    public function deleteLeader(int $id_leader) {
+    public function deleteRecord(int $id_leader) {
         $leader_delete = $this->db->delete('leader', 'id = ?', array($id_leader));
 
-        return $leader_delete;
+        if($leader_delete) {
+            return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal menghapus data.');
+        }
     }
 
-    public function listLeader(string $order, int $limit, int $index_start) {
+    public function listRecord(string $order, int $limit, int $index_start) {
         $query_leaders = 'SELECT
         leader.id,
         leader.first_name,
@@ -66,10 +88,14 @@ class Leader extends Model {
 
         $list_leaders = $this->db->rawQueryType('select', $query_leaders, array());
 
-        return $list_leaders;
+        if($list_leaders) {
+            return array('status'=> true, 'data'=> $list_leaders);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
     }
 
-    public function getLeader(int $id_leader) {
+    public function getRecord(int $id_leader) {
         $query_leaders = 'SELECT
         leader.id,
         leader.first_name,
@@ -83,6 +109,10 @@ class Leader extends Model {
 
         $list_leaders = $this->db->rawQueryType('select', $query_leaders, array());
 
-        return $list_leaders[0];
+        if($list_leaders) {
+            return array('status'=> true, 'data'=> $list_leaders[0]);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find any data.');
+        }
     }
  }

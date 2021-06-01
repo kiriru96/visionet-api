@@ -42,7 +42,11 @@ class Warehouse extends Model {
     public function listWareHouse(string $order, int $limit, int $index_start) {
         $list_warehouses = $this->db->selectColumns(array('id', 'name'), 'warehouse', 'ORDER BY '.$order.' LIMIT '.$index_start.','.$limit, array());
 
-        return $list_warehouses;
+        if($list_warehouses) {
+            return array('status'=> true, 'data'=> $list_warehouses);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
     }
 
     public function getWareHouse(int $id_warehouse) {

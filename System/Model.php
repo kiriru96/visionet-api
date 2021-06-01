@@ -7,6 +7,6 @@ class Model{
 
     public function setDB(&$settings){
         $database = new Database($settings);
-        $this->db = &$database->getDB();
+        $this->db = $database->getDB();
     }
 }

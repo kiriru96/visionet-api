@@ -47,7 +47,7 @@ class Controller{
 
 	public function loadModel($name, $class){ // load model and create object properties with name to hold class object
 		$this->$name = $class;
-		$this->$name->setDB($this->dbsetting);
+		$this->$name->setDB(self::$classLoad['dbsetting']);
 	}
 
 	public function NotFound(){

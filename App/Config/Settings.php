@@ -13,10 +13,10 @@ $path = array(
 /* optional setting you can change it*/
 $database = array(
 	'dbdriver'=>'pdo',
-	'hostname' => '0.0.0.0',
-	'username' => 'ethelwor_rbb',
-	'password' => 'P@!Bg5IQ!X=*',
-	'dbname' => 'ethelwor_rbb',
+	'hostname' => '127.0.0.1',
+	'username' => 'root',
+	'password' => '',
+	'dbname' => 'visionet',
 	'charset' => 'utf8',
 	'collate' => 'utf8_general_ci',
 	'encrypt' => FALSE,

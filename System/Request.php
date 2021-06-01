@@ -2,6 +2,7 @@
 
 namespace System;
 use System\URI;
+use Exception;
 
 class Request{
 
@@ -47,8 +48,9 @@ class Request{
 	}
 
 	public function getHeader($name){
-		$name = 'HTTP_'.strtoupper(preg_replace("/[!@#$%^&*-:;\/\\]]/", '_', $name));
+		$name 	= 'HTTP_'.strtoupper(preg_replace("/[!@#$%^&*-:;\/\\]]/", '_', $name));
 		$header = array_key_exists($name, $_SERVER) ? $_SERVER[$name] : null;
+
 		return $header;
 	}
 
@@ -56,11 +58,13 @@ class Request{
 		if(isset($_SERVER["REQUEST_METHOD"])){
 			return $_SERVER["REQUEST_METHOD"];
 		}
+
 		return "GET";
 	}
 
 	public function getClientIP() {
 		$ipaddress = '';
+
 		if (isset($_SERVER['HTTP_CLIENT_IP']))
 			$ipaddress = $_SERVER['HTTP_CLIENT_IP'];
 		else if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
@@ -75,6 +79,7 @@ class Request{
 			$ipaddress = $_SERVER['REMOTE_ADDR'];
 		else
 			$ipaddress = 'UNKNOWN';
+
 		return $ipaddress;
 	}
 
@@ -82,14 +87,16 @@ class Request{
 		if(isset($_POST[$key])){
 			return $_POST[$key];
 		}
-		return null;
+
+		throw new Exception('Key '.$key.' is not found in Post array.', 1);
 	}
 
 	public function Get($key){
 		if(isset($_GET[$key])){
 			return $_GET[$key];
 		}
-		return null;
+
+		throw new Exception('Key '.$key.' is not found in Get array.', 1);
 	}
 
 	public function setSession(&$session){

@@ -20,40 +20,62 @@ class Engginer extends Model {
     private function checkAccountEngginerExists($username) {
         $engginers = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password'), 'engginer', 'username = ?', array($username));
 
-        return $engginers[0];
+        if($engginers) {
+            return $engginers[0];
+        } else {
+            return null;
+        }
     }
 
-    public function createEngginer(string $first_name, string $last_name, string $username, string $password, int $location) {
+    public function addRecord(string $first_name, string $last_name, string $username, string $password, int $location) {
         $checkusername = $this->checkAccountEngginerExists($username);
 
         if($checkusername) {
             return array('status'=> false, 'msg'=> 'username sudah terpakai.');
         } else {
             $fields = array('first_name', 'last_name', 'username', 'password', 'location');
-            $values = array($first_name, $last_name, $username, $password, $location);
+            $values = array($first_name, $last_name, $username, password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]), $location);
             
             $engginer_insert = $this->db->insert('engginer', $fields, $values);
     
-            return array('status'=> true, 'id'=> $engginer_insert);
+            if($engginer_insert) {
+                return array('status'=> true, 'id'=> $engginer_insert);
+            } else {
+                return array('status'=> false, 'msg'=> 'failed to insert data.');
+            }
         }
     }
 
-    public function editEngginer(int $id_engginer, string $first_name, string $last_name, string $username, string $password, int $location) {
-        $fields = array('first_name', 'last_name', 'username', 'password', 'location');
-        $values = array($first_name, $last_name, $username, $password, $location);
+    public function editRecord(int $id_engginer, string $first_name, string $last_name, string $username, int $location) {
+        $checkusername = $this->checkAccountEngginerExists($username);
 
-        $engginer_update = $this->db->update('engginer', $fields, $values, 'id = '.$id_engginer);
+        if($checkusername) {
+            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        } else {
+            $fields = array('first_name', 'last_name', 'username', 'location');
+            $values = array($first_name, $last_name, $username, $location);
 
-        return $engginer_update;
+            $engginer_update = $this->db->update('engginer', $fields, $values, 'id = '.$id_engginer);
+
+            if($engginer_update > 0) {
+                return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $id_engginer, 'firstname'=> $first_name, 'lastname'=> $last_name, 'username'=> $username));
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
+            }
+        }
     }
 
-    public function deleteEngginer(int $id_engginer) {
+    public function deleteRecord(int $id_engginer) {
         $engginer_delete = $this->db->delete('engginer', 'id = ?', array($id_engginer));
 
-        return $engginer_delete;
+        if($engginer_delete) {
+            return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal menghapus data.');
+        }
     }
 
-    public function listEngginer(string $order, int $limit, int $index_start) {
+    public function listRecord(string $order, int $limit, int $index_start) {
         $query_engginers = 'SELECT
         engginer.id,
         engginer.first_name,
@@ -66,10 +88,14 @@ class Engginer extends Model {
 
         $list_engginers = $this->db->rawQueryType('select', $query_engginers, array());
 
-        return $list_engginers;
+        if($list_engginers) {
+            return array('status'=> true, 'data'=> $list_engginers);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
     }
 
-    public function getEngginer(int $id_engginer) {
+    public function getRecord(int $id_engginer) {
         $query_engginers = 'SELECT
         engginer.id,
         engginer.first_name,
@@ -83,6 +109,10 @@ class Engginer extends Model {
 
         $list_engginers = $this->db->rawQueryType('select', $query_engginers, array());
 
-        return $list_engginers[0];
+        if($list_engginers) {
+            return array('status'=> true, 'data'=> $list_engginers[0]);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find any data.');
+        }
     }
 }

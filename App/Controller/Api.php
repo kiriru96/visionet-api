@@ -17,21 +17,47 @@ use App\Model\Woec as Woec;
 use App\Model\Workorder as Workorder;
 
 class Api extends Controller {
-    public string $key = 'qwerty123456789';
+    private const KEY = 'qwerty123456789';
     private int $id;
     private int $type;
     private string $name;
     private string $username;
+    private $thrid_path;
 
     public function __construct() {
+        $other_path = $this->req?->getUri()?->getParamsPaths();
+        if(count($other_path) > 0) {
+            $this->thrid_path = $other_path[0];
+        }
+
         $second = strtolower($this->req?->getUri()?->getSecondPath());
 
+        header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Max-Age: 86400');    // cache for 1 day
+        
+    
+        // Access-Control headers are received during OPTIONS requests
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+                // may also be using PUT, PATCH, HEAD etc
+                header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
+            
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+                header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+        
+            exit(0);
+        }
+        
         header('Content-type: application/json');
 
-        if($second !== 'authentication') {
+        $second_link = ['authentication', 'insert', 'edit'];
+
+        if(!in_array($second, $second_link)) {
             $this->loadLib('jwt', 'JWT');
 
-            $result = $this->jwt->authenticated($this->key);
+            $result = $this->jwt->authenticated(self::KEY);
 
             if($result['status']) {
                 $token  = $result['token'];
@@ -56,8 +82,6 @@ class Api extends Controller {
 
     public function authentication() {
         if($this->req?->getMethod() === 'POST') {
-            $result = array();
-
             $username = $this->req->Post('username');
             $password = $this->req->Post('password');
             $type     = $this->req->Post('type');
@@ -84,10 +108,219 @@ class Api extends Controller {
                 if($result['status']) {
                     $data = $result['data'];
 
-                    return $this->res->json(array('status'=> true, 'token'=> $this->jwt->createToken($data, $this->key), 'data'=> $data));
+                    return $this->res->json(array('status'=> true, 'token'=> $this->jwt->createToken($data, self::KEY), 'data'=> $data));
+                } else {
+                    return $this->res->json(array('status'=> false, 'msg'=> 'username or password is wrong, please check again.'));
                 }
             } else {
-                return $this->res->json(array('status'=> false, 'msg'=> 'username or password is empty, please check fields'));
+                return $this->res->json(array('status'=> false, 'msg'=> 'username or password is empty, please check fields.'));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    // list data
+    public function list() {
+        if($this->req?->getMethod() === 'GET') {
+            if($this->thrid_path === 'device') {
+                $this->loadModel('content', new Device());
+            } else if($this->third_path === 'brand') {
+                $this->loadModel('content', new Brand());
+            } else if($this->third_path === 'location') {
+                $this->loadModel('content', new Location());
+            } else if($this->third_path === 'customer') {
+                $this->loadModel('content', new Customer());
+            } else if($this->third_path === 'warehouse') {
+                $this->loadModel('content', new Warehouse());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $result = $this->content->addRecord($name);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> $result['data']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request'));
+    }
+
+    // add data
+    public function add() {
+        if($this->req?->getMethod() === 'POST') {
+            if($this->thrid_path === 'device') {
+                $this->loadModel('content', new Device());
+            } else if($this->third_path === 'brand') {
+                $this->loadModel('content', new Brand());
+            } else if($this->third_path === 'location') {
+                $this->loadModel('content', new Location());
+            } else if($this->third_path === 'customer') {
+                $this->loadModel('content', new Customer());
+            } else if($this->third_path === 'warehouse') {
+                $this->loadModel('content', new Warehouse());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $name = $this->req?->Post('name');
+
+            $result = $this->content->addRecord($name);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> $result['id']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request'));
+    }
+
+    // update data
+    public function update() {
+        if($this->req?->getMethod() === 'POST') {
+            if($this->thrid_path === 'device') {
+                $this->loadModel('content', new Device());
+            } else if($this->third_path === 'brand') {
+                $this->loadModel('content', new Brand());
+            } else if($this->third_path === 'location') {
+                $this->loadModel('content', new Location());
+            } else if($this->third_path === 'customer') {
+                $this->loadModel('content', new Customer());
+            } else if($this->third_path === 'warehouse') {
+                $this->loadModel('content', new Warehouse());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $name = $this->req?->Post('name');
+
+            $result = $this->content->editRecord($name);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'msg'=> $result['msg'], 'data'=> $result['data']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request'));
+    }
+
+    // delete data
+    
+    public function delete() {
+        if($this->req?->getMethod() === 'POST') {
+            if($this->thrid_path === 'device') {
+                $this->loadModel('content', new Device());
+            } else if($this->third_path === 'brand') {
+                $this->loadModel('content', new Brand());
+            } else if($this->third_path === 'location') {
+                $this->loadModel('content', new Location());
+            } else if($this->third_path === 'customer') {
+                $this->loadModel('content', new Customer());
+            } else if($this->third_path === 'warehouse') {
+                $this->loadModel('content', new Warehouse());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $name = $this->req?->Post('name');
+
+            $result = $this->content->deleteRecord($name);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> $result['id']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request'));
+    }
+
+    //example insert data
+
+    public function insert() {
+        if($this->req?->getMethod() === 'POST') {
+            if($this->thrid_path === 'admin') {
+                $this->loadModel('account', new Admin());
+            } else if($this->thrid_path === 'leader') {
+                $this->loadModel('account', new Leader());
+            } else if($this->thrid_path === 'backupleader') {
+                $this->loadModel('account', new Backupleader());
+            } else if($this->thrid_path === 'engginer') {
+                $this->loadModel('account', new Engginer());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            if($this->thrid_path === 'admin') {
+                $fullname   = $this->req?->Post('fullname');
+                $username   = $this->req?->Post('username');
+                $password   = $this->req?->Post('password');
+
+                $result = $this->account->addAdmin($fullname, $username, $password);
+            } else {
+                $firstname  = $this->req?->Post('firstname');
+                $lastname   = $this->req?->Post('lastname');
+                $location   = (int) $this->req?->Post('location');
+                $username   = $this->req?->Post('username');
+                $password   = $this->req?->Post('password');
+
+                $result = $this->account->addRecord($firstname, $lastname, $username, $password, $location);
+            }
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> $result['id']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request'));
+    }
+
+    //example insert data
+
+    public function edit() {
+        if($this->req?->getMethod() === 'POST') {
+            if($this->thrid_path === 'admin') {
+                $this->loadModel('account', new Admin());
+            } else if($this->thrid_path === 'leader') {
+                $this->loadModel('account', new Leader());
+            } else if($this->thrid_path === 'backupleader') {
+                $this->loadModel('account', new Backupleader());
+            } else if($this->thrid_path === 'engginer') {
+                $this->loadModel('account', new Engginer());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $id_selected = $this->req?->Post('idselected');
+
+            if($this->thrid_path === 'admin') {
+                $fullname   = $this->req?->Post('fullname');
+                $username   = $this->req?->Post('username');
+
+                $result = $this->account->updateAdmin($id_selected, $fullname, $username);
+            } else {
+                $firstname  = $this->req?->Post('firstname');
+                $lastname   = $this->req?->Post('lastname');
+                $location   = (int) $this->req?->Post('location');
+                $username   = $this->req?->Post('username');
+
+                $result = $this->account->editRecord($id_selected, $firstname, $lastname, $username, $location);
+            }
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'message'=> $result['msg'], 'data'=> $result['data']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
             }
         }
 
@@ -319,96 +552,6 @@ class Api extends Controller {
 
             $result = $this->workorder->addWorkOrder($name);
             
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    // edit table
-
-    public function editadmin() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('admin', new Admin());
-
-            $idadmin    = $this->req?->Post('idselected');
-
-            $fullname   = $this->req?->Post('fullname');
-            $username   = $this->req?->Post('username');
-            $password   = $this->req?->Post('password');
-
-            $result = $this->admin->updateAdmin($idadmin, $fullname, $username, $password);
-
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    public function editleader() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('leader', new Leader());
-
-            $idleader    = $this->req?->Post('idselected');
-
-            $fullname   = $this->req?->Post('fullname');
-            $username   = $this->req?->Post('username');
-            $password   = $this->req?->Post('password');
-
-            $result = $this->leader->updateLeader($idleader, $fullname, $username, $password);
-
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    public function editbackupleader() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('backupleader', new Backupleader());
-
-            $idbackuplader    = $this->req?->Post('idselected');
-
-            $fullname   = $this->req?->Post('fullname');
-            $username   = $this->req?->Post('username');
-            $password   = $this->req?->Post('password');
-
-            $result = $this->backupleader->updateBackupLeader($idbackuplader, $fullname, $username, $password);
-
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    public function editengginer() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('engginer', new Backupleader());
-
-            $idengginer = $this->req?->Post('idselected');
-
-            $fullname   = $this->req?->Post('fullname');
-            $username   = $this->req?->Post('username');
-            $password   = $this->req?->Post('password');
-
-            $result = $this->engginer->updateEngginer($idengginer, $fullname, $username, $password);
-
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
             } else {

@@ -55,6 +55,10 @@ class Core{
 	}
 
 	private function LoadRender(){
-		call_user_func_array(array($this->loadClass, $this->_m), $this->_p);
+		try {
+			call_user_func_array(array($this->loadClass, $this->_m), $this->_p);
+		} catch (Exception $e) {
+			echo '<h3>'.$e->getMessage().'</h3>';
+		}
 	}
 }

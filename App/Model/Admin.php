@@ -20,7 +20,11 @@ class Admin extends Model {
     private function checkUsernameExists($username) {
         $admins = $this->db->selectColumns(array('id', 'fullname', 'username', 'password'), 'account', 'username = ?', array($username));
 
-        return $admins[0];
+        if($admins) {
+            return $admins[0];
+        } else {
+            return null;
+        }
     }
 
     public function addAdmin(string $fullname,string $username, string $password) {
@@ -38,14 +42,14 @@ class Admin extends Model {
         return array('status' => false, 'msg'=> 'username is exists.');
     }
 
-    public function updateAdmin(int $admin_id, string $fullname, string $username, string $password) {
-        $fields = array('fullname', 'username', 'password');
-        $values = array($fullname, $username, $password);
+    public function updateAdmin(int $admin_id, string $fullname, string $username) {
+        $fields = array('fullname', 'username');
+        $values = array($fullname, $username);
 
         $update_admin_status = $this->db->update('account', $fields, $values, 'id = '+$admin_id);
 
         if($update_admin_status > 0) {
-            return array('status'=> true, 'msg'=> 'berhasil memperbaharui.');
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $admin_id, 'fullname'=> $fullname, 'username'=> $username));
         } else {
             return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
         }
