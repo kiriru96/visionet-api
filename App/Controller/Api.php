@@ -26,20 +26,21 @@ class Api extends Controller {
 
     public function __construct() {
         $other_path = $this->req?->getUri()?->getParamsPaths();
+
         if(count($other_path) > 0) {
             $this->thrid_path = $other_path[0];
         }
 
         $second = strtolower($this->req?->getUri()?->getSecondPath());
 
-        header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Max-Age: 86400');    // cache for 1 day
+        if(isset($_SERVER['HTTP_ORIGIN'])) {
+            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Max-Age: 86400');    // cache for 1 day
+        }
         
-    
         // Access-Control headers are received during OPTIONS requests
         if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-            
             if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
                 // may also be using PUT, PATCH, HEAD etc
                 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
@@ -150,7 +151,7 @@ class Api extends Controller {
     }
 
     // add data
-    public function add() {
+    public function add($model) {
         if($this->req?->getMethod() === 'POST') {
             if($this->thrid_path === 'device') {
                 $this->loadModel('content', new Device());
@@ -327,91 +328,6 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request'));
     }
 
-    // insert data to table
-
-    public function addadmin() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('admin', new Admin());
-
-            $fullname   = $this->req?->Post('fullname');
-            $username   = $this->req?->Post('username');
-            $password   = $this->req?->Post('password');
-
-            $result = $this->admin->addAdmin($fullname, $username, $password);
-
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    public function addleader() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('leader', new Leader());
-
-            $first_name = $this->req?->Post('firstname');
-            $last_name  = $this->req?->Post('lastname');
-            $username   = $this->req?->Post('username');
-            $password   = $this->req?->Post('password');
-
-            $result = $this->leader->addLeader($first_name, $last_name, $username, $password);
-
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    public function addbackupleader() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('backupleader', new Backupleader());
-
-            $first_name = $this->req?->Post('firstname');
-            $last_name  = $this->req?->Post('lastname');
-            $username   = $this->req?->Post('username');
-            $password   = $this->req?->Post('password');
-
-            $result = $this->backupleader->addBackupLeader($first_name, $last_name, $username, $password);
-
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    public function addengginer() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('engginer', new Engginer());
-
-            $first_name = $this->req?->Post('firstname');
-            $last_name  = $this->req?->Post('lastname');
-            $username   = $this->req?->Post('username');
-            $password   = $this->req?->Post('password');
-
-            $result = $this->engginer->addEngginer($first_name, $last_name, $username, $password);
-
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
     public function addasset() {
         if($this->req?->getMethod() === 'POST' && $this->type === 0) {
             $this->loadModel('asset', new Asset());
@@ -436,114 +352,6 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
     }
 
-    public function addbrand() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('brand', new Brand());
-
-            $name     = (int) $this->req?->Post('brandname');
-
-            $result = $this->brand->addBrand($name);
-            
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    public function addcustomer() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('customer', new Customer());
-
-            $name     = (int) $this->req?->Post('customername');
-
-            $result = $this->customer->addCustomer($name);
-            
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-    
-    public function adddevice() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('device', new Device());
-
-            $name     = (int) $this->req?->Post('devicename');
-
-            $result = $this->device->addDevice($name);
-            
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    public function addlocation() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('location', new Location());
-
-            $name     = (int) $this->req?->Post('brandname');
-
-            $result = $this->location->addLocation($name);
-            
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    public function addwarehouse() {
-        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('warehouse', new Warehouse());
-
-            $name     = (int) $this->req?->Post('brandname');
-
-            $result = $this->warehouse->addWarehouse($name);
-            
-            if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    }
-
-    // public function addwoec() {
-    //     if($this->req?->getMethod() === 'POST') {
-    //         $this->loadModel('woec', new Woec());
-
-    //         $name     = (int) $this->req?->Post('brandname');
-
-    //         $result = $this->woec->addWorkOrderConfirm($name);
-            
-    //         if($result['status']) {
-    //             return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
-    //         } else {
-    //             return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-    //         }
-    //     }
-
-    //     return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
-    // }
-
     public function addworkorder() {
         if($this->req?->getMethod() === 'POST' && $this->type === 0) {
             $this->loadModel('workorder', new Woec());
@@ -562,56 +370,6 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
     }
 
-    // show list data of table
-
-    public function listadmin() {
-
-    }
-
-    public function listleader() {
-
-    }
-
-    public function listbackupleader() {
-
-    }
-
-    public function listengginer() {
-
-    }
-
-    public function listasset() {
-
-    }
-
-    public function listbrand() {
-
-    }
-
-    public function listcustomer() {
-
-    }
-
-    public function listdevice() {
-
-    }
-
-    public function listlocation() {
-
-    }
-
-    public function listwarehouse() {
-
-    }
-
-    public function listwoec() {
-
-    }
-
-    public function listworkorder() {
-
-    }
-
     // api for leader and backup leader
 
     public function areapointworkorder() {
@@ -624,7 +382,8 @@ class Api extends Controller {
 
     public function setengginer() {
         if($this->req?->getMethod() === 'POST' && ($this->type === 1 || $this->type == 2)) {
-
+            $wo_id          = $this->req?->Post('idwo');
+            $engginer_id    = $this->req?->Post('idengginer');
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
@@ -632,7 +391,7 @@ class Api extends Controller {
 
     public function confirmwork() {
         if($this->req?->getMethod() === 'POST' && ($this->type === 1 || $this->type == 2)) {
-
+            $wo_id  = $this->req?->Post('idwo');
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
@@ -649,22 +408,28 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
     }
 
-    public function listwoecconfirm() {
+    public function listwoec($action) {
         if($this->req?->getMethod() === 'GET' && $this->type === 3) {
-            $id_engginer = $this->req?->Post('id');
+            $id_engginer    = $this->id;
             
+            if($action === 'done') {
+
+            } else {
+                
+            }
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
     }
 
-    public function listwoecnotconfirm() {
-        if($this->req?->getMethod() === 'GET' && $this->type === 3) {
-            $id_engginer = $this->req?->Post('id');
-            
-        }
+    public function woec($action) {
+        if($this->req?->getMethod() === 'POST' && $this->type === 3) {
+            if($action === 'submit') {
 
-        return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            } else {
+
+            }
+        }
     }
 
     public function submitwoec() {
