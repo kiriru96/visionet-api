@@ -39,8 +39,10 @@ class Location extends Model {
         }
     }
 
-    public function listRecord(string $order, int $limit, int $index_start) {
-        $list_locations = $this->db->selectColumns(array('id', 'name'), 'location', 'ORDER BY '.$order.' LIMIT '.$index_start.','.$limit, array());
+    public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
+        $index = ($page - 1) * $limit;
+
+        $list_locations = $this->db->selectColumns(array('id', 'name'), 'location', 'ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array());
 
         if($list_locations) {
             return array('status'=> true, 'data'=> $list_locations);
@@ -59,5 +61,13 @@ class Location extends Model {
         } else {
             return array('status'=> false, 'msg'=> 'cannot find any data.');
         }
+    }
+    
+    public function allRows() {
+        $query = 'SELECT count(*) AS len FROM location';
+
+        $res = $this->db->rawQueryType('select', $query, array());
+
+        return $res[0]['len'];
     }
 }

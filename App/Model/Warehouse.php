@@ -39,8 +39,10 @@ class Warehouse extends Model {
         }
     }
 
-    public function listWareHouse(string $order, int $limit, int $index_start) {
-        $list_warehouses = $this->db->selectColumns(array('id', 'name'), 'warehouse', 'ORDER BY '.$order.' LIMIT '.$index_start.','.$limit, array());
+    public function listWareHouse(string $search, int $page, string $orderby, string $order, int $limit) {
+        $index = ($page - 1) * $limit;
+
+        $list_warehouses = $this->db->selectColumns(array('id', 'name'), 'warehouse', 'ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array());
 
         if($list_warehouses) {
             return array('status'=> true, 'data'=> $list_warehouses);
@@ -59,5 +61,13 @@ class Warehouse extends Model {
         } else {
             return array('status'=> false, 'msg'=> 'data tidak ditemukan.');
         }
+    }
+    
+    public function allRows() {
+        $query = 'SELECT count(*) AS len FROM warehouse';
+
+        $res = $this->db->rawQueryType('select', $query, array());
+
+        return $res[0]['len'];
     }
 }

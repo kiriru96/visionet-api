@@ -205,6 +205,7 @@ class PDODriver extends Database{
 			}else{
 				$query  = 'SELECT '.$colum.' FROM '.$table.' '.$where.'';
 			}
+			
 			$exe 	  = $db?->prepare($query);
 			$exe?->execute($value);
 			$result = $exe?->fetchAll(PDO::FETCH_ASSOC);

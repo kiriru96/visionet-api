@@ -39,8 +39,10 @@ class Device extends Model {
         }
     }
 
-    public function listRecord(string $order, int $limit, int $index_start) {
-        $list_devices = $this->db->selectColumns(array('id', 'name'), 'device_name', 'ORDER BY '.$order.' LIMIT '.$index_start.','.$limit, array());
+    public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
+        $index = ($page - 1) * $limit;
+
+        $list_devices = $this->db->selectColumns(array('id', 'name'), 'device_name', 'ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array());
 
         if($list_devices) {
             return array('status'=> true, 'data'=> $list_devices);
@@ -59,5 +61,13 @@ class Device extends Model {
         } else {
             return array('status'=> false, 'msg'=> 'cannot find any data.');
         }
+    }
+    
+    public function allRows() {
+        $query = 'SELECT count(*) AS len FROM device_name';
+
+        $res = $this->db->rawQueryType('select', $query, array());
+
+        return $res[0]['len'];
     }
 }

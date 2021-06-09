@@ -39,8 +39,10 @@ class Brand extends Model {
         }
     }
 
-    public function listRecord(string $order, int $limit, int $index_start) {
-        $list_brands = $this->db->selectColumns(array('id', 'name'), 'device_brand', 'ORDER BY '.$order.' LIMIT '.$index_start.','.$limit, array());
+    public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
+        $index = ($page - 1) * $limit;
+
+        $list_brands = $this->db->selectColumns(array('id', 'name'), 'device_brand', 'ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array());
 
         if($list_brands) {
             return array('status'=> true, 'data'=> $list_brands);
@@ -59,5 +61,13 @@ class Brand extends Model {
         } else {
             return array('status'=> false, 'msg'=> 'cannot find any data.');
         }
+    }
+    
+    public function allRows() {
+        $query = 'SELECT count(*) AS len FROM device_brand';
+
+        $res = $this->db->rawQueryType('select', $query, array());
+
+        return $res[0]['len'];
     }
 }

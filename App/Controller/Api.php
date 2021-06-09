@@ -63,10 +63,10 @@ class Api extends Controller {
             if($result['status']) {
                 $token  = $result['token'];
 
-                $this->id       = $token['id'];
-                $this->type     = $token['type'];
-                $this->name     = $token['name'];
-                $this->username = $token['username'];
+                $this->id       = $token->id;
+                $this->type     = $token->type;
+                $this->name     = $token->name;
+                $this->username = $token->username;
 
                 $this->loadModel('log', new Log());
             } else {
@@ -122,26 +122,33 @@ class Api extends Controller {
     }
 
     // list data
-    public function list() {
+    public function list($model) {
         if($this->req?->getMethod() === 'GET') {
-            if($this->thrid_path === 'device') {
+            if($model === 'device') {
                 $this->loadModel('content', new Device());
-            } else if($this->third_path === 'brand') {
+            } else if($model === 'brand') {
                 $this->loadModel('content', new Brand());
-            } else if($this->third_path === 'location') {
+            } else if($model === 'location') {
                 $this->loadModel('content', new Location());
-            } else if($this->third_path === 'customer') {
+            } else if($model === 'customer') {
                 $this->loadModel('content', new Customer());
-            } else if($this->third_path === 'warehouse') {
+            } else if($model === 'warehouse') {
                 $this->loadModel('content', new Warehouse());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
 
-            $result = $this->content->addRecord($name);
+            $page   = (int) $this->req?->Get('page');
+            $search = $this->req?->Get('search');
+            $sortby = $this->req?->Get('sortby');
+            $sort   = $this->req?->Get('sort');
+            $rows   = (int) $this->req?->Get('rows');
+
+            $result = $this->content->listRecord($search, $page, $sortby == 'null' ? 'id' : $sortby, $sort == 'undefined' ? 'ASC' : $sort, $rows);
+            $len = $this->content->allRows();
 
             if($result['status']) {
-                return $this->res?->json(array('status'=> true, 'data'=> $result['data']));
+                return $this->res?->json(array('status'=> true, 'data'=> array('list'=>$result['data'], 'len'=>(int)$len)));
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
             }
@@ -153,15 +160,15 @@ class Api extends Controller {
     // add data
     public function add($model) {
         if($this->req?->getMethod() === 'POST') {
-            if($this->thrid_path === 'device') {
+            if($model === 'device') {
                 $this->loadModel('content', new Device());
-            } else if($this->third_path === 'brand') {
+            } else if($model === 'brand') {
                 $this->loadModel('content', new Brand());
-            } else if($this->third_path === 'location') {
+            } else if($model === 'location') {
                 $this->loadModel('content', new Location());
-            } else if($this->third_path === 'customer') {
+            } else if($model === 'customer') {
                 $this->loadModel('content', new Customer());
-            } else if($this->third_path === 'warehouse') {
+            } else if($model === 'warehouse') {
                 $this->loadModel('content', new Warehouse());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
@@ -182,25 +189,26 @@ class Api extends Controller {
     }
 
     // update data
-    public function update() {
+    public function update($model) {
         if($this->req?->getMethod() === 'POST') {
-            if($this->thrid_path === 'device') {
+            if($model === 'device') {
                 $this->loadModel('content', new Device());
-            } else if($this->third_path === 'brand') {
+            } else if($model === 'brand') {
                 $this->loadModel('content', new Brand());
-            } else if($this->third_path === 'location') {
+            } else if($model === 'location') {
                 $this->loadModel('content', new Location());
-            } else if($this->third_path === 'customer') {
+            } else if($model === 'customer') {
                 $this->loadModel('content', new Customer());
-            } else if($this->third_path === 'warehouse') {
+            } else if($model === 'warehouse') {
                 $this->loadModel('content', new Warehouse());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
-
+            
+            $id   = (int) $this->req?->Post('id');
             $name = $this->req?->Post('name');
 
-            $result = $this->content->editRecord($name);
+            $result = $this->content->editRecord($id, $name);
 
             if($result['status']) {
                 return $this->res?->json(array('status'=> true, 'msg'=> $result['msg'], 'data'=> $result['data']));
@@ -214,25 +222,25 @@ class Api extends Controller {
 
     // delete data
     
-    public function delete() {
+    public function delete($model) {
         if($this->req?->getMethod() === 'POST') {
-            if($this->thrid_path === 'device') {
+            if($model === 'device') {
                 $this->loadModel('content', new Device());
-            } else if($this->third_path === 'brand') {
+            } else if($model === 'brand') {
                 $this->loadModel('content', new Brand());
-            } else if($this->third_path === 'location') {
+            } else if($model === 'location') {
                 $this->loadModel('content', new Location());
-            } else if($this->third_path === 'customer') {
+            } else if($model === 'customer') {
                 $this->loadModel('content', new Customer());
-            } else if($this->third_path === 'warehouse') {
+            } else if($model === 'warehouse') {
                 $this->loadModel('content', new Warehouse());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
 
-            $name = $this->req?->Post('name');
+            $id = (int) $this->req?->Post('id');
 
-            $result = $this->content->deleteRecord($name);
+            $result = $this->content->deleteRecord($id);
 
             if($result['status']) {
                 return $this->res?->json(array('status'=> true, 'data'=> $result['id']));
@@ -246,21 +254,21 @@ class Api extends Controller {
 
     //example insert data
 
-    public function insert() {
+    public function insert($model) {
         if($this->req?->getMethod() === 'POST') {
-            if($this->thrid_path === 'admin') {
+            if($model === 'admin') {
                 $this->loadModel('account', new Admin());
-            } else if($this->thrid_path === 'leader') {
+            } else if($model === 'leader') {
                 $this->loadModel('account', new Leader());
-            } else if($this->thrid_path === 'backupleader') {
+            } else if($model === 'backupleader') {
                 $this->loadModel('account', new Backupleader());
-            } else if($this->thrid_path === 'engginer') {
+            } else if($model === 'engginer') {
                 $this->loadModel('account', new Engginer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
 
-            if($this->thrid_path === 'admin') {
+            if($model === 'admin') {
                 $fullname   = $this->req?->Post('fullname');
                 $username   = $this->req?->Post('username');
                 $password   = $this->req?->Post('password');
@@ -288,15 +296,15 @@ class Api extends Controller {
 
     //example insert data
 
-    public function edit() {
+    public function edit($model) {
         if($this->req?->getMethod() === 'POST') {
-            if($this->thrid_path === 'admin') {
+            if($model === 'admin') {
                 $this->loadModel('account', new Admin());
-            } else if($this->thrid_path === 'leader') {
+            } else if($model === 'leader') {
                 $this->loadModel('account', new Leader());
-            } else if($this->thrid_path === 'backupleader') {
+            } else if($model === 'backupleader') {
                 $this->loadModel('account', new Backupleader());
-            } else if($this->thrid_path === 'engginer') {
+            } else if($model === 'engginer') {
                 $this->loadModel('account', new Engginer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
@@ -304,7 +312,7 @@ class Api extends Controller {
 
             $id_selected = $this->req?->Post('idselected');
 
-            if($this->thrid_path === 'admin') {
+            if($model === 'admin') {
                 $fullname   = $this->req?->Post('fullname');
                 $username   = $this->req?->Post('username');
 
