@@ -3,16 +3,32 @@ namespace App\Model;
 use System\Model as Model;
 
 class Brand extends Model {
-    public function addRecord(string $name) {
-        $fields = array('name');
-        $values = array($name);
+    private function checkRecordExists(string $name) {
+        $list_brands = $this->db->selectColumns(array('name'), 'device_brand', 'name = ?', array(trim($name)));
 
-        $id_brand = $this->db->insert('device_brand', $fields, $values);
-
-        if($id_brand) {
-            return array('status'=> true, 'id'=> $id_brand);
+        if($list_brands) {
+            return $list_brands[0]['name'];
         } else {
-            return array('status'=> false, 'msg'=> 'gagal membuat data.');
+            return null;
+        }
+    }
+
+    public function addRecord(string $name) {
+        $checkRecord = $this->checkRecordExists($name);
+        
+        if(!$checkRecord) {
+            $fields = array('name');
+            $values = array($name);
+    
+            $id_brand = $this->db->insert('device_brand', $fields, $values);
+    
+            if($id_brand) {
+                return array('status'=> true, 'id'=> $id_brand);
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal membuat data.');
+            }
+        } else {
+            return array('status'=> false, 'msg'=> 'nama sudah digunakan');
         }
     }
 
@@ -42,7 +58,24 @@ class Brand extends Model {
     public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
         $index = ($page - 1) * $limit;
 
-        $list_brands = $this->db->selectColumns(array('id', 'name'), 'device_brand', 'ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array());
+        $src = '%'.trim($search).'%';
+
+        $list_brands = $this->db->selectColumns(array('id', 'name'), 'device_brand', ' name LIKE ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src));
+
+        if($list_brands) {
+            return array('status'=> true, 'data'=> $list_brands);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
+    }
+
+    public function lightListRecord(string $search) {
+        $list_brands = null;
+
+        if(trim($search) !== '' && strlen(trim($search)) >= 3) {
+            $src = '%'.trim($search).'%';
+            $list_brands = $this->db->selectColumns(array('id', 'name'), 'device_brand', ' name LIKE ? ORDER BY id ASC LIMIT 0, 20', array($src));
+        }
 
         if($list_brands) {
             return array('status'=> true, 'data'=> $list_brands);

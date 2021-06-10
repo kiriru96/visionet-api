@@ -3,16 +3,32 @@ namespace App\Model;
 use System\Model as Model;
 
 class Warehouse extends Model {
-    public function addWareHouse(string $name) {
-        $fields = array('name');
-        $values = array($name);
+    private function checkRecordExists(string $name) {
+        $list_brands = $this->db->selectColumns(array('name'), 'warehouse', 'name = ?', array(trim($name)));
 
-        $id_warehouse = $this->db->insert('warehouse', $fields, $values);
-
-        if($id_warehouse) {
-            return array('status'=> true, 'id'=> $id_warehouse);
+        if($list_brands) {
+            return $list_brands[0]['name'];
         } else {
-            return array('status'=> false, 'msg'=> 'gagal membuat data.');
+            return null;
+        }
+    }
+
+    public function addWareHouse(string $name) {
+        $checkRecord = $this->checkRecordExists($name);
+        
+        if(!$checkRecord) {
+            $fields = array('name');
+            $values = array($name);
+
+            $id_warehouse = $this->db->insert('warehouse', $fields, $values);
+
+            if($id_warehouse) {
+                return array('status'=> true, 'id'=> $id_warehouse);
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal membuat data.');
+            }
+        } else {
+            return array('status'=> false, 'msg'=> 'nama sudah digunakan');
         }
     }
 
@@ -42,7 +58,9 @@ class Warehouse extends Model {
     public function listWareHouse(string $search, int $page, string $orderby, string $order, int $limit) {
         $index = ($page - 1) * $limit;
 
-        $list_warehouses = $this->db->selectColumns(array('id', 'name'), 'warehouse', 'ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array());
+        $src = '%'.trim($search).'%';
+
+        $list_warehouses = $this->db->selectColumns(array('id', 'name'), 'warehouse', ' name LIKE ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src));
 
         if($list_warehouses) {
             return array('status'=> true, 'data'=> $list_warehouses);

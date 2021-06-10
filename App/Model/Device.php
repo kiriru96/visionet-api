@@ -3,16 +3,32 @@ namespace App\Model;
 use System\Model as Model;
 
 class Device extends Model {
-    public function addRecord(string $name) {
-        $fields = array('name');
-        $values = array($name);
+    private function checkRecordExists(string $name) {
+        $list_brands = $this->db->selectColumns(array('name'), 'device_name', 'name = ?', array(trim($name)));
 
-        $id_device = $this->db->insert('device_name', $fields, $values);
-
-        if($id_device) {
-            return array('status'=> true, 'id'=> $id_device);
+        if($list_brands) {
+            return $list_brands[0]['name'];
         } else {
-            return array('status'=> false, 'msg'=> 'gagal membuat data.');
+            return null;
+        }
+    }
+
+    public function addRecord(string $name) {
+        $checkRecord = $this->checkRecordExists($name);
+        
+        if(!$checkRecord) {
+            $fields = array('name');
+            $values = array($name);
+
+            $id_device = $this->db->insert('device_name', $fields, $values);
+
+            if($id_device) {
+                return array('status'=> true, 'id'=> $id_device);
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal membuat data.');
+            }
+        } else {
+            return array('status'=> false, 'msg'=> 'nama sudah digunakan');
         }
     }
 
@@ -42,7 +58,9 @@ class Device extends Model {
     public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
         $index = ($page - 1) * $limit;
 
-        $list_devices = $this->db->selectColumns(array('id', 'name'), 'device_name', 'ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array());
+        $src = '%'.trim($search).'%';
+
+        $list_devices = $this->db->selectColumns(array('id', 'name'), 'device_name', ' name LIKE ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src));
 
         if($list_devices) {
             return array('status'=> true, 'data'=> $list_devices);

@@ -3,16 +3,32 @@ namespace App\Model;
 use System\Model as Model;
 
 class Location extends Model {
-    public function addRecord(string $name) {
-        $fields = array('name');
-        $values = array($name);
+    private function checkRecordExists(string $name) {
+        $list_brands = $this->db->selectColumns(array('name'), 'location', 'name = ?', array(trim($name)));
 
-        $id_location = $this->db->insert('location', $fields, $values);
-
-        if($id_location) {
-            return array('status'=> true, 'id'=> $id_location);
+        if($list_brands) {
+            return $list_brands[0]['name'];
         } else {
-            return array('status'=> false, 'msg'=> 'gagal memasukan data.');
+            return null;
+        }
+    }
+
+    public function addRecord(string $name) {
+        $checkRecord = $this->checkRecordExists($name);
+        
+        if(!$checkRecord) {
+            $fields = array('name');
+            $values = array($name);
+
+            $id_location = $this->db->insert('location', $fields, $values);
+
+            if($id_location) {
+                return array('status'=> true, 'id'=> $id_location);
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal memasukan data.');
+            }
+        } else {
+            return array('status'=> false, 'msg'=> 'nama sudah digunakan');
         }
     }
 
@@ -42,7 +58,9 @@ class Location extends Model {
     public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
         $index = ($page - 1) * $limit;
 
-        $list_locations = $this->db->selectColumns(array('id', 'name'), 'location', 'ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array());
+        $src = '%'.trim($search).'%';
+
+        $list_locations = $this->db->selectColumns(array('id', 'name'), 'location', ' name LIKE ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src));
 
         if($list_locations) {
             return array('status'=> true, 'data'=> $list_locations);
