@@ -342,10 +342,11 @@ class Api extends Controller {
 
             $id_device_name     = (int) $this->req?->Post('devicename');
             $id_device_brand    = (int) $this->req?->Post('devicebrand');
+            $model              = $this->req?->Post('model');
             $serial_number      = $this->req?->Post('serialnumber');
             $condition          = (int) $this->req?->Post('condition');
             $description        = $this->req?->Post('description');
-            $date_in            = $this->req?->Post('datein');
+            $date_in            = date('Y-m-d');
             $id_warehouse       = (int) $this->req?->Post('warehouse');
 
             $result = $this->asset->addAsset($id_device_name, $id_device_brand, $serial_number, $condition, $description, $date_in, $id_warehouse);
@@ -364,7 +365,9 @@ class Api extends Controller {
         if($this->req?->getMethod() === 'POST' && $this->type === 0) {
             $this->loadModel('workorder', new Woec());
 
-            $name     = (int) $this->req?->Post('brandname');
+            $idasset    = $this->req?->Post('asset');
+            $customer   = $this->req?->Post('customer');
+            $location   = $this->req?->Post('location');
 
             $result = $this->workorder->addWorkOrder($name);
             
