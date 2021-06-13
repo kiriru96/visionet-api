@@ -96,10 +96,12 @@ class Brand extends Model {
         }
     }
     
-    public function allRows() {
-        $query = 'SELECT count(*) AS len FROM device_brand';
+    public function allRows(string $search) {
+        $src = '%'.trim($search).'%';
 
-        $res = $this->db->rawQueryType('select', $query, array());
+        $query = 'SELECT count(*) AS len FROM device_brand  WHERE name LIKE ?';
+
+        $res = $this->db->rawQueryType('select', $query, array($src));
 
         return $res[0]['len'];
     }

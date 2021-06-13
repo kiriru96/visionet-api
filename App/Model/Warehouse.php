@@ -13,7 +13,7 @@ class Warehouse extends Model {
         }
     }
 
-    public function addWareHouse(string $name) {
+    public function addRecord(string $name) {
         $checkRecord = $this->checkRecordExists($name);
         
         if(!$checkRecord) {
@@ -32,7 +32,7 @@ class Warehouse extends Model {
         }
     }
 
-    public function deleteWareHouse(int $id_warehouse) {
+    public function deleteRecord(int $id_warehouse) {
         $delete_warehouse = $this->db->delete('warehoue', 'id = ?', array($id_warehouse));
 
         if($delete_warehouse) {
@@ -42,7 +42,7 @@ class Warehouse extends Model {
         }
     }
 
-    public function editWareHouse(int $id_warehouse, string $name) {
+    public function editRecord(int $id_warehouse, string $name) {
         $fields = array('name');
         $values = array($name);
 
@@ -55,7 +55,7 @@ class Warehouse extends Model {
         }
     }
 
-    public function listWareHouse(string $search, int $page, string $orderby, string $order, int $limit) {
+    public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
         $index = ($page - 1) * $limit;
 
         $src = '%'.trim($search).'%';
@@ -64,6 +64,21 @@ class Warehouse extends Model {
 
         if($list_warehouses) {
             return array('status'=> true, 'data'=> $list_warehouses);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
+    }
+
+    public function lightListRecord(string $search) {
+        $list_brands = null;
+
+        if(trim($search) !== '' && strlen(trim($search)) >= 3) {
+            $src = '%'.trim($search).'%';
+            $list_brands = $this->db->selectColumns(array('id', 'name'), 'warehouse', ' name LIKE ? ORDER BY id ASC LIMIT 0, 20', array($src));
+        }
+
+        if($list_brands) {
+            return array('status'=> true, 'data'=> $list_brands);
         } else {
             return array('status'=> false, 'msg'=> 'cannot find list data.');
         }
@@ -81,10 +96,12 @@ class Warehouse extends Model {
         }
     }
     
-    public function allRows() {
-        $query = 'SELECT count(*) AS len FROM warehouse';
+    public function allRows(string $search) {
+        $src = '%'.trim($search).'%';
 
-        $res = $this->db->rawQueryType('select', $query, array());
+        $query = 'SELECT count(*) AS len FROM warehouse  WHERE name LIKE ?';
+
+        $res = $this->db->rawQueryType('select', $query, array($src));
 
         return $res[0]['len'];
     }

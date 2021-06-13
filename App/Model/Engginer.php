@@ -75,18 +75,23 @@ class Engginer extends Model {
         }
     }
 
-    public function listRecord(string $order, int $limit, int $index_start) {
-        $query_engginers = 'SELECT
-        engginer.id,
-        engginer.first_name,
-        engginer.last_name,
-        engginer.username,
-        `location`.`name` as locationname
-        FROM engginer
-        INNER JOIN `location` ON engginer.location = `location`.id
-        ORDER BY '.$order.' LIMIT '.$index_start.', '.$limit;
+    public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
+        $index = ($page - 1) * $limit;
 
-        $list_engginers = $this->db->rawQueryType('select', $query_engginers, array());
+        $src = '%'.trim($search).'%';
+
+        $query_engginers = 'SELECT
+            engginer.id,
+            engginer.first_name,
+            engginer.last_name,
+            engginer.username,
+            `location`.`name` as locationname
+            FROM engginer
+            INNER JOIN `location` ON engginer.location = `location`.id
+            WHERE engginer.first_name LIKE ? OR engginer.last_name LIKE ? OR engginer.username LIKE ?
+            ORDER BY '.$orderby.' DESC LIMIT '.$index.', '.$limit;
+
+        $list_engginers = $this->db->rawQueryType('select', $query_engginers, array($src, $src, $src));
 
         if($list_engginers) {
             return array('status'=> true, 'data'=> $list_engginers);
@@ -114,5 +119,18 @@ class Engginer extends Model {
         } else {
             return array('status'=> false, 'msg'=> 'cannot find any data.');
         }
+    }
+    
+    public function allRows(string $search) {
+        $src = '%'.trim($search).'%';
+
+        $query = 'SELECT count(*) AS len 
+        FROM engginer
+        INNER JOIN `location` ON engginer.location = `location`.id
+        WHERE engginer.first_name LIKE ? OR engginer.last_name LIKE ? OR engginer.username LIKE ?';
+
+        $res = $this->db->rawQueryType('select', $query, array($src, $src, $src));
+
+        return $res[0]['len'];
     }
 }

@@ -69,6 +69,21 @@ class Location extends Model {
         }
     }
 
+    public function lightListRecord(string $search) {
+        $list_brands = null;
+
+        if(trim($search) !== '' && strlen(trim($search)) >= 3) {
+            $src = '%'.trim($search).'%';
+            $list_brands = $this->db->selectColumns(array('id', 'name'), 'location', ' name LIKE ? ORDER BY id ASC LIMIT 0, 20', array($src));
+        }
+
+        if($list_brands) {
+            return array('status'=> true, 'data'=> $list_brands);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
+    }
+
     public function getRecord(int $id_location) {
         $list_locations = $this->db->selectColumns(array('id', 'name'), 'location', 'id = ?', array($id_location));
 
@@ -81,10 +96,12 @@ class Location extends Model {
         }
     }
     
-    public function allRows() {
-        $query = 'SELECT count(*) AS len FROM location';
+    public function allRows(string $search) {
+        $src = '%'.trim($search).'%';
 
-        $res = $this->db->rawQueryType('select', $query, array());
+        $query = 'SELECT count(*) AS len FROM location  WHERE name LIKE ?';
+
+        $res = $this->db->rawQueryType('select', $query, array($src));
 
         return $res[0]['len'];
     }

@@ -69,6 +69,21 @@ class Device extends Model {
         }
     }
 
+    public function lightListRecord(string $search) {
+        $list_brands = null;
+        
+        if(trim($search) !== '' && strlen(trim($search)) >= 3) {
+            $src = '%'.trim($search).'%';
+            $list_brands = $this->db->selectColumns(array('id', 'name'), 'device_name', ' name LIKE ? ORDER BY id ASC LIMIT 0, 20', array($src));
+        }
+
+        if($list_brands) {
+            return array('status'=> true, 'data'=> $list_brands);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
+    }
+
     public function getRecord(int $id_device) {
         $list_devices = $this->db->selectColumns(array('id', 'name'), 'device_name', 'id = ?', array($id_device));
 
@@ -81,10 +96,12 @@ class Device extends Model {
         }
     }
     
-    public function allRows() {
-        $query = 'SELECT count(*) AS len FROM device_name';
+    public function allRows(string $search) {
+        $src = '%'.trim($search).'%';
 
-        $res = $this->db->rawQueryType('select', $query, array());
+        $query = 'SELECT count(*) AS len FROM device_name  WHERE name LIKE ?';
+
+        $res = $this->db->rawQueryType('select', $query, array($src));
 
         return $res[0]['len'];
     }

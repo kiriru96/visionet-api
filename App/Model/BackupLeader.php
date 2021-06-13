@@ -75,7 +75,11 @@ class Backupleader extends Model {
         }
     }
 
-    public function listBackupLeader(string $order, int $limit, int $index_start) {
+    public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
+        $index = ($page - 1) * $limit;
+
+        $src = '%'.trim($search).'%';
+
         $query_backupleaders = 'SELECT
         backupleader.id,
         backupleader.first_name,
@@ -84,9 +88,10 @@ class Backupleader extends Model {
         `location`.`name` as locationname
         FROM backupleader
         INNER JOIN `location` ON backupleader.location = `location`.id
-        ORDER BY '.$order.' LIMIT '.$index_start.', '.$limit;
+        WHERE backupleader.first_name LIKE ? OR backupleader.last_name LIKE ? OR backupleader.username LIKE ?
+        ORDER BY '.$orderby.' DESC LIMIT '.$index.', '.$limit;
 
-        $list_backupleaders = $this->db->rawQueryType('select', $query_backupleaders, array());
+        $list_backupleaders = $this->db->rawQueryType('select', $query_backupleaders, array($src, $src, $src));
 
         if($list_backupleaders) {
             return array('status'=> true, 'data'=> $list_backupleaders);
@@ -114,5 +119,18 @@ class Backupleader extends Model {
         } else {
             return array('status'=> false, 'msg'=> 'cannot find data.');
         }
+    }
+    
+    public function allRows(string $search) {
+        $src = '%'.trim($search).'%';
+
+        $query = 'SELECT count(*) AS len 
+        FROM backupleader
+        INNER JOIN `location` ON backupleader.location = `location`.id
+        WHERE backupleader.first_name LIKE ? OR backupleader.last_name LIKE ? OR backupleader.username LIKE ?';
+
+        $res = $this->db->rawQueryType('select', $query, array($src, $src, $src));
+
+        return $res[0]['len'];
     }
 }

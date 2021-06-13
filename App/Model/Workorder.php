@@ -3,16 +3,31 @@ namespace App\Model;
 use System\Model as Model;
 
 class Workorder extends Model {
-    public function createWork($asset, $location, $customer) {
-        $fields = array('asset', 'customer', 'location', 'engginer', 'status');
-        $values = array($asset, $customer, $location, 0, 0);
-
-        $wo = $this->db->insert('work_order', $fields, $values);
+    private function checkWOExists($asset) {
+        $wo = $this->db->selectColumns(array('asset'), 'work_order', 'asset = ?', array($asset));
 
         if($wo) {
-            return array('status'=> true, 'id'=> $wo);
+            return $wo[0];
         } else {
-            return array('status'=> false, 'msg'=> 'gagal membuat data');
+            return null;
+        }
+    }
+    public function createWork($asset, $location, $customer) {
+        $checkExists = $this->checkWOExists($asset);
+
+        if(!$checkExists) {
+            $fields = array('asset', 'customer', 'location', 'engginer', 'status');
+            $values = array($asset, $customer, $location, 0, 0);
+    
+            $wo = $this->db->insert('work_order', $fields, $values);
+    
+            if($wo) {
+                return array('status'=> true, 'id'=> $wo);
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal membuat data');
+            }
+        } else {
+            return array('status'=> false, 'msg'=> 'asset telah ada pada work order.')
         }
     }
 

@@ -75,18 +75,24 @@ class Leader extends Model {
         }
     }
 
-    public function listRecord(string $order, int $limit, int $index_start) {
+    public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
+        $index = ($page - 1) * $limit;
+
+        $src = '%'.trim($search).'%';
+
         $query_leaders = 'SELECT
         leader.id,
         leader.first_name,
         leader.last_name,
         leader.username,
-        `location`.`name` as locationname
+        `location`.`name` as locationname,
+        leader.location
         FROM leader
         INNER JOIN `location` ON leader.location = `location`.id
-        ORDER BY '.$order.' LIMIT '.$index_start.', '.$limit;
+        WHERE leader.first_name LIKE ? OR leader.last_name LIKE ? OR leader.username LIKE ?
+        ORDER BY '.$orderby.' DESC LIMIT '.$index.', '.$limit;
 
-        $list_leaders = $this->db->rawQueryType('select', $query_leaders, array());
+        $list_leaders = $this->db->rawQueryType('select', $query_leaders, array($src, $src, $src));
 
         if($list_leaders) {
             return array('status'=> true, 'data'=> $list_leaders);
@@ -114,5 +120,18 @@ class Leader extends Model {
         } else {
             return array('status'=> false, 'msg'=> 'cannot find any data.');
         }
+    }
+    
+    public function allRows(string $search) {
+        $src = '%'.trim($search).'%';
+
+        $query = 'SELECT count(*) AS len 
+        FROM leader
+        INNER JOIN `location` ON leader.location = `location`.id
+        WHERE leader.first_name LIKE ? OR leader.last_name LIKE ? OR leader.username LIKE ?';
+
+        $res = $this->db->rawQueryType('select', $query, array($src, $src, $src));
+
+        return $res[0]['len'];
     }
  }

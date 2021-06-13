@@ -15,6 +15,7 @@ use App\Model\Location as Location;
 use App\Model\Warehouse as Warehouse;
 use App\Model\Woec as Woec;
 use App\Model\Workorder as Workorder;
+use App\Model\Condition as Condition;
 
 class Api extends Controller {
     private const KEY = 'qwerty123456789';
@@ -121,6 +122,41 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
     }
 
+    // light search data
+    public function light($model) {
+        if($this->req?->getMethod() === 'GET') {
+            if($model === 'device') {
+                $this->loadModel('content', new Device());
+            } else if($model === 'brand') {
+                $this->loadModel('content', new Brand());
+            } else if($model === 'location') {
+                $this->loadModel('content', new Location());
+            } else if($model === 'customer') {
+                $this->loadModel('content', new Customer());
+            } else if($model === 'warehouse') {
+                $this->loadModel('content', new Warehouse());
+            } else if($model === 'assets') {
+                $this->loadModel('content', new Asset());
+            } else if($model === 'condition') {
+                $this->loadModel('content', new Condition());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $search = $this->req?->Get('search');
+
+            $result = $this->content->lightListRecord($search);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> array('list'=>$result['data'])));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request'));
+    }
+
     // list data
     public function list($model) {
         if($this->req?->getMethod() === 'GET') {
@@ -134,6 +170,14 @@ class Api extends Controller {
                 $this->loadModel('content', new Customer());
             } else if($model === 'warehouse') {
                 $this->loadModel('content', new Warehouse());
+            } else if($model === 'assets') {
+                $this->loadModel('content', new Asset());
+            } else if($model === 'backupleader') {
+                $this->loadModel('content', new Backupleader());
+            } else if($model === 'leader') {
+                $this->loadModel('content', new Leader());
+            } else if($model === 'engginer') {
+                $this->loadModel('content', new Engginer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -145,7 +189,7 @@ class Api extends Controller {
             $rows   = (int) $this->req?->Get('rows');
 
             $result = $this->content->listRecord($search, $page, $sortby == 'null' ? 'id' : $sortby, $sort == 'undefined' ? 'ASC' : $sort, $rows);
-            $len = $this->content->allRows();
+            $len = $this->content->allRows($search);
 
             if($result['status']) {
                 return $this->res?->json(array('status'=> true, 'data'=> array('list'=>$result['data'], 'len'=>(int)$len)));
@@ -340,16 +384,41 @@ class Api extends Controller {
         if($this->req?->getMethod() === 'POST' && $this->type === 0) {
             $this->loadModel('asset', new Asset());
 
-            $id_device_name     = (int) $this->req?->Post('devicename');
-            $id_device_brand    = (int) $this->req?->Post('devicebrand');
+            $id_device_name     = (int) $this->req?->Post('device_id');
+            $id_device_brand    = (int) $this->req?->Post('brand_id');
             $model              = $this->req?->Post('model');
-            $serial_number      = $this->req?->Post('serialnumber');
-            $condition          = (int) $this->req?->Post('condition');
+            $serial_number      = $this->req?->Post('serial_number');
+            $condition          = (int) $this->req?->Post('condition_id');
             $description        = $this->req?->Post('description');
             $date_in            = date('Y-m-d');
-            $id_warehouse       = (int) $this->req?->Post('warehouse');
+            $id_warehouse       = (int) $this->req?->Post('warehouse_id');
 
-            $result = $this->asset->addAsset($id_device_name, $id_device_brand, $serial_number, $condition, $description, $date_in, $id_warehouse);
+            $result = $this->asset->addAsset($id_device_name, $id_device_brand, $model, $serial_number, $condition, $description, $date_in, $id_warehouse);
+            
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
+    }
+
+    public function updateasset() {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
+            $this->loadModel('asset', new Asset());
+
+            $id                 = (int) $this->req?->Post('id');
+            $id_device_name     = (int) $this->req?->Post('device_id');
+            $id_device_brand    = (int) $this->req?->Post('brand_id');
+            $model              = $this->req?->Post('model');
+            $serial_number      = $this->req?->Post('serial_number');
+            $condition          = (int) $this->req?->Post('condition_id');
+            $description        = $this->req?->Post('description');
+            $id_warehouse       = (int) $this->req?->Post('warehouse_id');
+
+            $result = $this->asset->editAsset($id, $id_device_name, $id_device_brand, $model, $serial_number, $condition, $description, $id_warehouse);
             
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
@@ -385,7 +454,19 @@ class Api extends Controller {
 
     public function areapointworkorder() {
         if($this->req?->getMethod() === 'GET' && ($this->type === 1 || $this->type == 2)) {
+            $this->loadModel('wo', new Workorder());
 
+            $dateselect = $this->req?->Get('date');
+            $page       = $this->req?->Get('page');
+
+            $result = $this->wo->listWO($dateselect, $page);
+            $len = $this->content->allRows();
+
+            if($result['status']) {
+                return $this->res->json(array('status'=> false, 'data'=> array('list'=>$result['data'], 'len'=>(int)$len)));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
@@ -395,6 +476,16 @@ class Api extends Controller {
         if($this->req?->getMethod() === 'POST' && ($this->type === 1 || $this->type == 2)) {
             $wo_id          = $this->req?->Post('idwo');
             $engginer_id    = $this->req?->Post('idengginer');
+            
+            $this->loadModel('wo', new Workorder());
+
+            $result = $this->wo->setEngginer($wo_id, $engginer_id);
+
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'data'=> $result['data']));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> $resuult['msg']));
+            }
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
@@ -403,6 +494,16 @@ class Api extends Controller {
     public function confirmwork() {
         if($this->req?->getMethod() === 'POST' && ($this->type === 1 || $this->type == 2)) {
             $wo_id  = $this->req?->Post('idwo');
+            
+            $this->loadModel('wo', new Workorder());
+
+            $result = $this->wo->confitmWO($wo_id);
+
+            if($result['status']) {
+                return array('status'=> true, 'data'=> $result['data']);
+            } else {
+                return array('status'=> false, 'msg'=> $result['msg']);
+            }
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
@@ -412,8 +513,18 @@ class Api extends Controller {
 
     public function listengginerworkorder() {
         if($this->req?->getMethod() === 'GET' && $this->type === 3) {
-            $id_engginer = $this->req?->Post('id');
+            $dateselect = $this->req?->Get('date');
+            $page       = $this->req?->Get('page');
 
+            $this->loadModel('woec', new Woec());
+
+            $result = $this->woec->listRecord($dateselect, $page);
+
+            if($result['status']) {
+                return array('status'=> true, 'data'=> $result['data']);
+            } else {
+                return array('status'=> false, 'msg'=> $result['msg']);
+            }
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
@@ -423,29 +534,26 @@ class Api extends Controller {
         if($this->req?->getMethod() === 'GET' && $this->type === 3) {
             $id_engginer    = $this->id;
             
-            if($action === 'done') {
+            $dateselect = $this->req?->Get('date');
+            $page       = $this->req?->Get('page');
 
+            $this->loadModel('woec', new Woec());
+
+            $result = $this->woec->listRecord($id_engginer, $dateselect, $page);
+
+            if($result['status']) {
+                return array('status'=> true, 'data'=> $result['data']);
             } else {
-                
+                return array('status'=> false, 'msg'=> $result['msg']);
             }
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
     }
 
-    public function woec($action) {
-        if($this->req?->getMethod() === 'POST' && $this->type === 3) {
-            if($action === 'submit') {
-
-            } else {
-
-            }
-        }
-    }
-
     public function submitwoec() {
         if($this->req?->getMethod() === 'POST' && $this->type === 3) {
-            $id_engginer    = $this->req?->Post('id');
+            $id_engginer    = $this->id;
             $id_work_order  = $this->req?->Post('idwo');
 
             $images_uploads = array();
