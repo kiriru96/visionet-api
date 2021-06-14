@@ -75,6 +75,25 @@ class Engginer extends Model {
         }
     }
 
+    public function lightListRecord(string $search) {
+        $src = '%'.trim($search).'%';
+
+        $query = 'SELECT
+        id,
+        username AS name
+        FROM engginer
+        WHERE username LIKE ?
+        ORDER BY username ASC LIMIT 0, 20';
+
+        $list_engginers = $this->db->rawQueryType('select', $query, array($src));
+
+        if($list_engginers) {
+            return array('status'=> true, 'data'=> $list_engginers);
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find list data.');
+        }
+    }
+
     public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
         $index = ($page - 1) * $limit;
 

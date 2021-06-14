@@ -10,7 +10,7 @@ class Backupleader extends Model {
             $hash_password = $backupleader['password'];
 
             if(password_verify($password, $hash_password)) {
-                return array('status'=> true, 'data'=> array('id'=> $backupleader['id'], 'type'=> 2, 'username'=> $backupleader['username'], 'name'=> $backupleader['first_name'].' '.$backupleader['last_name']));
+                return array('status'=> true, 'data'=> array('id'=> $backupleader['id'], 'type'=> 2, 'username'=> $backupleader['username'], 'location'=> $backupleader['location'], 'name'=> $backupleader['first_name'].' '.$backupleader['last_name']));
             }
         }
 
@@ -18,7 +18,7 @@ class Backupleader extends Model {
     }
 
     private function checkAccountBackupLeaderExists($username) {
-        $backupleaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password'), 'backupleader', 'username = ?', array($username));
+        $backupleaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'backupleader', 'username = ?', array($username));
 
         if($backupleaders) {
             return $backupleaders[0];

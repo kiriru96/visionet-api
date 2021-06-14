@@ -40,7 +40,7 @@ class Woec extends Model {
         return $woec_update;
     }
 
-    public function listWOEC(string $date, int $limit, int $index_start) {
+    public function listWOEC(string $date, int $page) {
         
     }
 

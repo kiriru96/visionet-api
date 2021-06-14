@@ -10,7 +10,7 @@ class Leader extends Model {
             $hash_password = $leader['password'];
 
             if(password_verify($password, $hash_password)) {
-                return array('status'=> true, 'data'=> array('id'=> $leader['id'], 'type'=> 1, 'username'=> $leader['username'], 'name'=> $leader['first_name'].' '.$leader['last_name']));
+                return array('status'=> true, 'data'=> array('id'=> $leader['id'], 'type'=> 1, 'username'=> $leader['username'], 'location'=> $leader['location'],'name'=> $leader['first_name'].' '.$leader['last_name']));
             }
         }
 
@@ -18,7 +18,7 @@ class Leader extends Model {
     }
 
     private function checkAccountLeaderExists($username) {
-        $leaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password'), 'leader', 'username = ?', array($username));
+        $leaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'leader', 'username = ?', array($username));
 
         if($leaders) {
             return $leaders[0];

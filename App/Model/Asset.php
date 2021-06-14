@@ -173,4 +173,20 @@ class Asset extends Model {
 
         return $res[0]['len'];
     }
+
+    public function allRowsCustom(string $column, int $type) {
+
+        $query = 'SELECT 
+                    count(*) AS len 
+                FROM assets AS ass 
+                INNER JOIN device_name AS dn ON  ass.device_name = dn.id 
+                INNER JOIN device_brand AS db ON ass.device_brand = db.id 
+                INNER JOIN warehouse AS wh ON ass.warehouse = wh.id
+                INNER JOIN conditions AS cond ON ass.condition_status = cond.id
+                WHERE '.$column.' = '.$type;
+        
+        $res = $this->db->rawQueryType('select', $query, array());
+
+        return $res[0]['len'];
+    }
 }

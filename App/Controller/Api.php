@@ -23,6 +23,7 @@ class Api extends Controller {
     private int $type;
     private string $name;
     private string $username;
+    private int $location = -1;
     private $thrid_path;
 
     public function __construct() {
@@ -54,8 +55,8 @@ class Api extends Controller {
         
         header('Content-type: application/json');
 
-        $second_link = ['authentication', 'insert', 'edit'];
-
+        $second_link = ['authentication'];
+        
         if(!in_array($second, $second_link)) {
             $this->loadLib('jwt', 'JWT');
 
@@ -69,6 +70,10 @@ class Api extends Controller {
                 $this->name     = $token->name;
                 $this->username = $token->username;
 
+                if(($this->type === 1 || $this->type === 2) && $token->location) {
+                    $this->location = $token->location;
+                }
+
                 $this->loadModel('log', new Log());
             } else {
                 $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request, token not found.'));
@@ -80,6 +85,40 @@ class Api extends Controller {
 
     public function index() {
         $this->res?->json(array('version'=>'0.1.0', 'name'=>'visionet'));
+    }
+
+    public function home() {
+        if($this->req?->getMethod() === 'GET') {
+            $this->loadModel('asset', new Asset());
+
+            $asset_all          = $this->asset->allRows('');
+            $asset_new          = $this->asset->allRowsCustom('ass.condition_status', 1);
+            $asset_used         = $this->asset->allRowsCustom('ass.condition_status', 2);
+            $asset_repaired     = $this->asset->allRowsCustom('ass.condition_status', 3);
+            $asset_damaged      = $this->asset->allRowsCustom('ass.condition_status', 4);
+            $asset_dump         = $this->asset->allRowsCustom('ass.condition_status', 5);
+
+            // var_dump(array(
+            //     'all'=> $asset_all, 
+            //     'new'=> $asset_new,
+            //     'used'=> $asset_used,
+            //     'repaired'=> $asset_repaired,
+            //     'damaged'=> $asset_damaged,
+            //     'dump'=> $asset_dump));
+            // die();
+
+            return $this->res?->json(
+                array(
+                    'status'=> true, 
+                    'data'=>array(
+                        'all'=> $asset_all, 
+                        'new'=> $asset_new,
+                        'used'=> $asset_used,
+                        'repaired'=> $asset_repaired,
+                        'damaged'=> $asset_damaged,
+                        'dump'=> $asset_dump)));
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot handle request.'));
     }
 
     public function authentication() {
@@ -139,6 +178,8 @@ class Api extends Controller {
                 $this->loadModel('content', new Asset());
             } else if($model === 'condition') {
                 $this->loadModel('content', new Condition());
+            } else if($model === 'engginer') {
+                $this->loadModel('content', new Engginer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -178,6 +219,8 @@ class Api extends Controller {
                 $this->loadModel('content', new Leader());
             } else if($model === 'engginer') {
                 $this->loadModel('content', new Engginer());
+            } else if($model === 'workorder') {
+                $this->loadModel('content', new WorkOrder());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -432,13 +475,13 @@ class Api extends Controller {
 
     public function addworkorder() {
         if($this->req?->getMethod() === 'POST' && $this->type === 0) {
-            $this->loadModel('workorder', new Woec());
+            $this->loadModel('workorder', new WorkOrder());
 
-            $idasset    = $this->req?->Post('asset');
-            $customer   = $this->req?->Post('customer');
-            $location   = $this->req?->Post('location');
+            $idasset    = (int) $this->req?->Post('asset');
+            $idcustomer = (int) $this->req?->Post('customer');
+            $idlocation = (int) $this->req?->Post('location');
 
-            $result = $this->workorder->addWorkOrder($name);
+            $result = $this->workorder->createWork($idasset, $idlocation, $idcustomer);
             
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
@@ -450,7 +493,64 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
     }
 
+    public function updateworkorder() {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
+            $this->loadModel('workorder', new WorkOrder());
+
+            $idwork     = (int) $this->req?->Post('id');
+            $idcustomer = (int) $this->req?->Post('customer');
+            $idlocation = (int) $this->req?->Post('location');
+
+            $result = $this->workorder->updateWork($idwork, $idlocation, $idcustomer);
+            
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
+    }
+
     // api for leader and backup leader
+
+    public function workorderdetail() {
+        if($this->req?->getMethod() === 'GET' && ($this->type === 1 || $this->type == 2)) {
+            $this->loadModel('wo', new Workorder());
+
+            $id = (int) $this->req?->Get('id');
+
+            $result = $this->wo->detailWO($id);
+
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'data'=> $result['data']));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
+    }
+
+    public function workorderrequest() {
+        if($this->req?->getMethod() === 'GET' && ($this->type === 1 || $this->type == 2)) {
+            $this->loadModel('wo', new Workorder());
+
+            $date = $this->req?->Get('date');
+            $page = (int) $this->req?->Get('page');
+
+            $result = $this->wo->listWorkOrderReq($date, $page, (int) $this->location);
+
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
+    }
 
     public function areapointworkorder() {
         if($this->req?->getMethod() === 'GET' && ($this->type === 1 || $this->type == 2)) {
@@ -474,21 +574,40 @@ class Api extends Controller {
 
     public function setengginer() {
         if($this->req?->getMethod() === 'POST' && ($this->type === 1 || $this->type == 2)) {
-            $wo_id          = $this->req?->Post('idwo');
-            $engginer_id    = $this->req?->Post('idengginer');
+            $wo_id          = (int) $this->req?->Post('idwo');
+            $engginer_id    = (int) $this->req?->Post('idengginer');
             
             $this->loadModel('wo', new Workorder());
 
-            $result = $this->wo->setEngginer($wo_id, $engginer_id);
+            $result = $this->wo->signEngginer($wo_id, $engginer_id);
 
             if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> $result['data']));
+                return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));
             } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $resuult['msg']));
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
             }
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function engginersubmit() {
+        if($this->req?->getMethod() === 'GET' && ($this->type === 1 || $this->type == 2)) {
+            $this->loadModel('woec', new Woec());
+
+            $date = $this->req?->Get('date');
+            $page = (int) $this->req?->Get('page');
+
+            $result = $this->wo->listWorkOrderReq($date, $page);
+
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
     }
 
     public function confirmwork() {
