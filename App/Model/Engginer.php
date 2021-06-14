@@ -80,7 +80,9 @@ class Engginer extends Model {
 
         $query = 'SELECT
         id,
-        username AS name
+        username,
+        first_name,
+        last_name
         FROM engginer
         WHERE username LIKE ?
         ORDER BY username ASC LIMIT 0, 20';

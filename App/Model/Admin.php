@@ -18,7 +18,7 @@ class Admin extends Model {
     }
 
     private function checkUsernameExists($username) {
-        $admins = $this->db->selectColumns(array('id', 'fullname', 'username', 'password'), 'account', 'username = ?', array($username));
+        $admins = $this->db->selectColumns(array('id', 'fullname', 'username', 'password'), 'admin', 'username = ?', array($username));
 
         if($admins) {
             return $admins[0];
@@ -34,7 +34,7 @@ class Admin extends Model {
             $fields = array('fullname', 'username', 'password');
             $values = array($fullname, $username, password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]));
     
-            $admin_new_id = $this->db->insert('account', $fields, $values);
+            $admin_new_id = $this->db->insert('admin', $fields, $values);
     
             return array('status' => true, 'id' => $admin_new_id);
         }
@@ -46,7 +46,7 @@ class Admin extends Model {
         $fields = array('fullname', 'username');
         $values = array($fullname, $username);
 
-        $update_admin_status = $this->db->update('account', $fields, $values, 'id = '+$admin_id);
+        $update_admin_status = $this->db->update('admin', $fields, $values, 'id = '+$admin_id);
 
         if($update_admin_status > 0) {
             return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $admin_id, 'fullname'=> $fullname, 'username'=> $username));
@@ -56,7 +56,7 @@ class Admin extends Model {
     }
 
     public function deleteAdmin(int $delete_id, int $admin_id) {
-        $delete_admin = $this->db->delete('account', 'id = '+$admin_id);
+        $delete_admin = $this->db->delete('admin', 'id = '+$admin_id);
 
         if($delete_admin > 0) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus.');

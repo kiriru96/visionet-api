@@ -67,12 +67,14 @@ class Asset extends Model {
                         wh.name AS warehousename,
                         ass.date_in,
                         ass.date_out,
-                        ass.datecreated
+                        ass.datecreated,
+                        wo.id AS workorder_id
                     FROM assets AS ass 
                         INNER JOIN device_brand AS db ON ass.device_brand = db.id
                         INNER JOIN device_name AS dn ON ass.device_name = dn.id
                         INNER JOIN warehouse AS wh ON ass.warehouse = wh.id
                         INNER JOIN conditions AS cond ON ass.condition_status = cond.id
+                        LEFT JOIN work_order AS wo ON wo.asset = ass.id
                     WHERE
                         ass.serial_number LIKE ?
                     ORDER BY ass.id DESC LIMIT '.$index.', '.$limit;
