@@ -16,8 +16,8 @@ class Workorder extends Model {
         $checkExists = $this->checkWOExists($asset);
 
         if(!$checkExists) {
-            $fields = array('asset', 'customer', 'location', 'engginer', 'status');
-            $values = array($asset, $customer, $location, 0, 0);
+            $fields = array('asset', 'customer', 'location');
+            $values = array($asset, $customer, $location);
     
             $wo = $this->db->insert('work_order', $fields, $values);
     

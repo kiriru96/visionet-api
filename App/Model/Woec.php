@@ -40,8 +40,10 @@ class Woec extends Model {
         return $woec_update;
     }
 
-    public function listWOEC(string $date, int $page) {
-        
+    public function listWOEC(string $date, int $page, int $location) {
+        $index = ($page - 1) * 20;
+
+        $query = 'SELECT'
     }
 
     public function detailWOEC(int $id) {

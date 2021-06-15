@@ -552,26 +552,6 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
     }
 
-    public function areapointworkorder() {
-        if($this->req?->getMethod() === 'GET' && ($this->type === 1 || $this->type == 2)) {
-            $this->loadModel('wo', new Workorder());
-
-            $dateselect = $this->req?->Get('date');
-            $page       = $this->req?->Get('page');
-
-            $result = $this->wo->listWO($dateselect, $page);
-            $len = $this->content->allRows();
-
-            if($result['status']) {
-                return $this->res->json(array('status'=> false, 'data'=> array('list'=>$result['data'], 'len'=>(int)$len)));
-            } else {
-                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
-            }
-        }
-
-        return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
-    }
-
     public function setengginer() {
         if($this->req?->getMethod() === 'POST' && ($this->type === 1 || $this->type == 2)) {
             $wo_id          = (int) $this->req?->Post('idwo');
@@ -591,14 +571,14 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
     }
 
-    public function engginersubmit() {
+    public function engginersubmitlist() {
         if($this->req?->getMethod() === 'GET' && ($this->type === 1 || $this->type == 2)) {
             $this->loadModel('woec', new Woec());
 
             $date = $this->req?->Get('date');
             $page = (int) $this->req?->Get('page');
 
-            $result = $this->wo->listWorkOrderReq($date, $page);
+            $result = $this->woec->listWOEC($date, $page, (int) $this->location);
 
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));

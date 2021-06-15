@@ -165,6 +165,24 @@ class Asset extends Model {
             return array('status'=> false, 'msg'=> 'tidak ada assets');
         }
     }
+
+    public function reportTable($date) {
+        $query = 'SELECT
+        FROM assets AS ass
+        INNER JOIN device_name AS dn ON ass.device_name = dn.id
+        INNER JOIN device_brand AS db ON ass.device_brand = db.id
+        INNER JOIN conditions AS cond ON ass.condition_status = cond.id
+        INNER JOIN warehouse AS wh ON ass.warehouse = wh.id
+        WHERE ass.date_in = ?';
+
+        $report_table = $this->db->rawQueryType('select', $query, array($src));
+
+        if($report_table) {
+            return array('status'=> true, 'table'=> $report_table);
+        } else {
+            return array('status'=> false, 'msg'=> 'Tidak terdapat data yang bisa ditampilkan.');
+        }
+    }
     
     public function allRows(string $search) {
         $src = '%'.trim($search).'%';
