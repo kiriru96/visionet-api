@@ -6,7 +6,11 @@ class Asset extends Model {
     private function checkSerialNumberExists(string $serial_number) {
         $assets = $this->db->selectColumns(array('serial_number'), 'assets', 'serial_number = ?', array($serial_number));
 
-        return $assets[0];
+        if($assets) {
+            return $assets[0];
+        } else {
+            return null;
+        }
     }
 
     public function addAsset(int $id_device_name, int $id_device_brand, string $model, string $serial_number, int $condition, string $description, string $datein, int $id_warehouse) {
@@ -24,7 +28,7 @@ class Asset extends Model {
         }
     }
 
-    public function deleteAsset(int $id_asset) {
+    public function deleteRecord(int $id_asset) {
         $asset_delete = $this->db->delete('assets', 'id = ?', array($id_asset));
 
         if($asset_delete > 0) {

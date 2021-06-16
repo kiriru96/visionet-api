@@ -321,6 +321,8 @@ class Api extends Controller {
                 $this->loadModel('content', new Customer());
             } else if($model === 'warehouse') {
                 $this->loadModel('content', new Warehouse());
+            } else if($model === 'asset') {
+                $this->loadModel('content', new Asset());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -330,7 +332,7 @@ class Api extends Controller {
             $result = $this->content->deleteRecord($id);
 
             if($result['status']) {
-                return $this->res?->json(array('status'=> true, 'data'=> $result['id']));
+                return $this->res?->json(array('status'=> true, 'data'=> $result['msg']));
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
             }
@@ -464,7 +466,7 @@ class Api extends Controller {
             $result = $this->asset->editAsset($id, $id_device_name, $id_device_brand, $model, $serial_number, $condition, $description, $id_warehouse);
             
             if($result['status']) {
-                return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
+                return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));
             } else {
                 return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
             }
