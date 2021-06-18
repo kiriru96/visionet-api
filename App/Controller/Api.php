@@ -55,7 +55,7 @@ class Api extends Controller {
         
         header('Content-type: application/json');
 
-        $second_link = ['authentication'];
+        $second_link = ['authentication', 'test'];
         
         if(!in_array($second, $second_link)) {
             $this->loadLib('jwt', 'JWT');
@@ -81,6 +81,13 @@ class Api extends Controller {
                 exit();
             }
         }
+    }
+
+    public function test() {
+        $data = json_decode(file_get_contents('php://input'), true);
+        print_r($data);
+        var_dump($_FILES);
+        var_dump($_POST);
     }
 
     public function index() {
