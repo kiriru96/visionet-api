@@ -16,6 +16,8 @@ use App\Model\Warehouse as Warehouse;
 use App\Model\Woec as Woec;
 use App\Model\Workorder as Workorder;
 use App\Model\Condition as Condition;
+use App\Model\StockIn as StockIn;
+use App\Model\StockOut as StockOut;
 
 class Api extends Controller {
     private const KEY = 'qwerty123456789';
@@ -88,6 +90,8 @@ class Api extends Controller {
         print_r($data);
         var_dump($_FILES);
         var_dump($_POST);
+        var_dump($_COOKIE);
+        var_dump($_SESSION);
     }
 
     public function index() {
@@ -126,6 +130,12 @@ class Api extends Controller {
                         'dump'=> $asset_dump)));
         }
         return $this->res?->json(array('status'=> false, 'msg'=> 'cannot handle request.'));
+    }
+
+    public function checkperiodic() {
+        if($this->req?->getMethod() === 'POST') {
+            
+        }
     }
 
     public function authentication() {
@@ -228,6 +238,8 @@ class Api extends Controller {
                 $this->loadModel('content', new Engginer());
             } else if($model === 'workorder') {
                 $this->loadModel('content', new WorkOrder());
+            } else if($mode === 'admin') {
+                $this->loadModel('content', new Admin());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -330,6 +342,14 @@ class Api extends Controller {
                 $this->loadModel('content', new Warehouse());
             } else if($model === 'asset') {
                 $this->loadModel('content', new Asset());
+            } else if($model === 'admin') {
+                $this->loadModel('content', new Admin());
+            } else if($model === 'backupleader') {
+                $this->loadModel('content', new Backupleader());
+            } else if($model === 'leader') {
+                $this->loadModel('content', new Leader());
+            } else if($model === 'engginer') {
+                $this->loadModel('content', new Engginer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -440,12 +460,10 @@ class Api extends Controller {
             $id_device_brand    = (int) $this->req?->Post('brand_id');
             $model              = $this->req?->Post('model');
             $serial_number      = $this->req?->Post('serial_number');
-            $condition          = (int) $this->req?->Post('condition_id');
             $description        = $this->req?->Post('description');
-            $date_in            = date('Y-m-d');
             $id_warehouse       = (int) $this->req?->Post('warehouse_id');
 
-            $result = $this->asset->addAsset($id_device_name, $id_device_brand, $model, $serial_number, $condition, $description, $date_in, $id_warehouse);
+            $result = $this->asset->addAsset($id_device_name, $id_device_brand, $model, $serial_number, $description, $id_warehouse);
             
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
@@ -466,11 +484,10 @@ class Api extends Controller {
             $id_device_brand    = (int) $this->req?->Post('brand_id');
             $model              = $this->req?->Post('model');
             $serial_number      = $this->req?->Post('serial_number');
-            $condition          = (int) $this->req?->Post('condition_id');
             $description        = $this->req?->Post('description');
             $id_warehouse       = (int) $this->req?->Post('warehouse_id');
 
-            $result = $this->asset->editAsset($id, $id_device_name, $id_device_brand, $model, $serial_number, $condition, $description, $id_warehouse);
+            $result = $this->asset->editAsset($id, $id_device_name, $id_device_brand, $model, $serial_number, $description, $id_warehouse);
             
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));
@@ -738,5 +755,73 @@ class Api extends Controller {
         }
 
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function addstockhistory($model) {
+        if($this->req?->getMethod() === 'POST') {
+            if($model === 'in') {
+                $this->loadModel('stock', new StockIn());
+            } else if($model === 'out') {
+                $this->loadModel('stock', new StockOut());
+            } else {
+
+            }
+        }
+    }
+
+    public function liststockhistory($model) {
+        if($this->req?->getMethod() === 'GET') {
+            if($model === 'in') {
+                $this->loadModel('stock', new StockIn());
+            } else if($model === 'out') {
+                $this->loadModel('stock', new StockOut());
+            } else {
+
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function submitstockhistory($model) {
+        if($this->req?->getMethod() === 'POST') {
+            if($model === 'in') {
+                $this->loadModel('stock', new StockIn());
+            } else if($model === 'out') {
+                $this->loadModel('stock', new StockOut());
+            } else {
+
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function deletestockhistory($model) {
+        if($this->req?->getMethod() === 'POST') {
+            if($model === 'in') {
+                $this->loadModel('stock', new StockIn());
+            } else if($model === 'out') {
+                $this->loadModel('stock', new StockOut());
+            } else {
+
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function editstockhistory($model) {
+        if($this->req?->getMethod() === 'POST') {
+            if($model === 'in') {
+                $this->loadModel('stock', new StockIn());
+            } else if($model === 'out') {
+                $this->loadModel('stock', new StockOut());
+            } else {
+
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
     }
 }

@@ -4,8 +4,15 @@ use System\Controller as Controller;
 use App\Model\Asset as Asset;
 
 class Report extends Controller {
-    public function assets() {
+    public function assets($model) {
         if($this->req?->getMethod() === 'GET') {
+            if($model === 'in') {
+
+            } else if($model === 'out') {
+
+            } else {
+                
+            }
             $this->loadModel('asset', new Asset());
 
             $date = $this->req?->Get('date');

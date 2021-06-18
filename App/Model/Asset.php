@@ -13,12 +13,12 @@ class Asset extends Model {
         }
     }
 
-    public function addAsset(int $id_device_name, int $id_device_brand, string $model, string $serial_number, int $condition, string $description, string $datein, int $id_warehouse) {
+    public function addAsset(int $id_device_name, int $id_device_brand, string $model, string $serial_number, string $description, int $id_warehouse) {
         $checkAsset = $this->checkSerialNumberExists($serial_number);
 
         if(!$checkAsset) {
-            $fields = array('device_name', 'device_brand', 'model', 'serial_number', 'condition_status', 'description', 'date_in', 'warehouse');
-            $values = array($id_device_name, $id_device_brand, $model, $serial_number, $condition, $description, date($datein), $id_warehouse);
+            $fields = array('device_name', 'device_brand', 'model', 'serial_number', 'description', 'warehouse');
+            $values = array($id_device_name, $id_device_brand, $model, $serial_number, $description, $id_warehouse);
     
             $asset = $this->db->insert('assets', $fields, $values);
     
@@ -38,9 +38,9 @@ class Asset extends Model {
         }
     }
 
-    public function editAsset(int $asset_id, int $id_device_name, int $id_device_brand, string $model, string $serial_number, int $condition, string $description, int $id_warehouse) {
-        $fields = array('device_name', 'device_brand', 'model', 'serial_number', 'condition_Status', 'description', 'warehouse');
-        $values = array($id_device_name, $id_device_brand, $model, $serial_number, $condition, $description, $id_warehouse);
+    public function editAsset(int $asset_id, int $id_device_name, int $id_device_brand, string $model, string $serial_number, string $description, int $id_warehouse) {
+        $fields = array('device_name', 'device_brand', 'model', 'serial_number', 'description', 'warehouse');
+        $values = array($id_device_name, $id_device_brand, $model, $serial_number, $description, $id_warehouse);
 
         $asset = $this->db->update('assets', $fields, $values, 'id = '.$asset_id);
 
@@ -64,20 +64,15 @@ class Asset extends Model {
                         db.name AS brandname,
                         ass.model,
                         ass.serial_number,
-                        ass.condition_status AS condition_id,
-                        cond.name AS conditionstatus,
                         ass.description,
                         ass.warehouse AS warehouse_id,
                         wh.name AS warehousename,
-                        ass.date_in,
-                        ass.date_out,
                         ass.datecreated,
                         wo.id AS workorder_id
                     FROM assets AS ass 
                         INNER JOIN device_brand AS db ON ass.device_brand = db.id
                         INNER JOIN device_name AS dn ON ass.device_name = dn.id
                         INNER JOIN warehouse AS wh ON ass.warehouse = wh.id
-                        INNER JOIN conditions AS cond ON ass.condition_status = cond.id
                         LEFT JOIN work_order AS wo ON wo.asset = ass.id
                     WHERE
                         ass.serial_number LIKE ?

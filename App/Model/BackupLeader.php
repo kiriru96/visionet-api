@@ -65,7 +65,7 @@ class Backupleader extends Model {
         }
     }
 
-    public function deleteBackupLeader(int $id_backupleader) {
+    public function deleteRecord(int $id_backupleader) {
         $backupleader_delete = $this->db->delete('backupleader', 'id = ?', array($id_backupleader));
 
         if($backupleader_delete) {
