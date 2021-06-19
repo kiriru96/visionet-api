@@ -238,7 +238,7 @@ class Api extends Controller {
                 $this->loadModel('content', new Engginer());
             } else if($model === 'workorder') {
                 $this->loadModel('content', new WorkOrder());
-            } else if($mode === 'admin') {
+            } else if($model === 'admin') {
                 $this->loadModel('content', new Admin());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
@@ -410,6 +410,84 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request'));
     }
 
+    public function getprofile($type, $id) {
+        if($this->req?->getMethod() === 'GET') {
+            if($type === 'admin') {
+                $this->loadModel('account', new Admin());
+            } else if($type === 'leader') {
+                $this->loadModel('account', new Leader());
+            } else if($type === 'backupleader') {
+                $this->loadModel('account', new Backupleader());
+            } else if($type === 'engginer') {
+                $this->loadModel('account', new Engginer());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $result = $this->account->profile($id);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> $result['data']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+    }
+
+    public function changepassword($model) {
+        if($this->req?->getMethod() === 'POST') {
+            if($model === 'admin') {
+                $this->loadModel('account', new Admin());
+            } else if($model === 'leader') {
+                $this->loadModel('account', new Leader());
+            } else if($model === 'backupleader') {
+                $this->loadModel('account', new Backupleader());
+            } else if($model === 'engginer') {
+                $this->loadModel('account', new Engginer());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $id         = (int) $this->req?->Post('id');
+            $password   = $this->req?->Post('password');
+
+            $result = $this->account->changePassword($id, $password);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'msg'=> $result['msg']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+    }
+
+    public function changeusername($model) {
+        if($this->req?->getMethod() === 'POST') {
+            if($model === 'admin') {
+                $this->loadModel('account', new Admin());
+            } else if($model === 'leader') {
+                $this->loadModel('account', new Leader());
+            } else if($model === 'backupleader') {
+                $this->loadModel('account', new Backupleader());
+            } else if($model === 'engginer') {
+                $this->loadModel('account', new Engginer());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $id         = $this->req?->Post('id');
+            $username   = $this->req?->Post('username');
+
+            $result = $this->account->changeUsername($id, $uesrname);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'msg'=> $result['msg']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+    }
+
     //example insert data
 
     public function edit($model) {
@@ -426,20 +504,18 @@ class Api extends Controller {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
 
-            $id_selected = $this->req?->Post('idselected');
+            $id_selected = $this->req?->Post('id');
 
             if($model === 'admin') {
                 $fullname   = $this->req?->Post('fullname');
-                $username   = $this->req?->Post('username');
 
-                $result = $this->account->updateAdmin($id_selected, $fullname, $username);
+                $result = $this->account->editRecord($id_selected, $fullname);
             } else {
                 $firstname  = $this->req?->Post('firstname');
                 $lastname   = $this->req?->Post('lastname');
                 $location   = (int) $this->req?->Post('location');
-                $username   = $this->req?->Post('username');
 
-                $result = $this->account->editRecord($id_selected, $firstname, $lastname, $username, $location);
+                $result = $this->account->editRecord($id_selected, $firstname, $lastname, $location);
             }
 
             if($result['status']) {
@@ -461,9 +537,8 @@ class Api extends Controller {
             $model              = $this->req?->Post('model');
             $serial_number      = $this->req?->Post('serial_number');
             $description        = $this->req?->Post('description');
-            $id_warehouse       = (int) $this->req?->Post('warehouse_id');
 
-            $result = $this->asset->addAsset($id_device_name, $id_device_brand, $model, $serial_number, $description, $id_warehouse);
+            $result = $this->asset->addAsset($id_device_name, $id_device_brand, $model, $serial_number, $description);
             
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
@@ -485,9 +560,8 @@ class Api extends Controller {
             $model              = $this->req?->Post('model');
             $serial_number      = $this->req?->Post('serial_number');
             $description        = $this->req?->Post('description');
-            $id_warehouse       = (int) $this->req?->Post('warehouse_id');
 
-            $result = $this->asset->editAsset($id, $id_device_name, $id_device_brand, $model, $serial_number, $description, $id_warehouse);
+            $result = $this->asset->editAsset($id, $id_device_name, $id_device_brand, $model, $serial_number, $description);
             
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));

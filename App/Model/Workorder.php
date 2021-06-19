@@ -13,21 +13,15 @@ class Workorder extends Model {
         }
     }
     public function createWork(int $asset, int $location, int $customer) {
-        $checkExists = $this->checkWOExists($asset);
+        $fields = array('asset', 'customer', 'location');
+        $values = array($asset, $customer, $location);
 
-        if(!$checkExists) {
-            $fields = array('asset', 'customer', 'location');
-            $values = array($asset, $customer, $location);
-    
-            $wo = $this->db->insert('work_order', $fields, $values);
-    
-            if($wo) {
-                return array('status'=> true, 'id'=> $wo);
-            } else {
-                return array('status'=> false, 'msg'=> 'gagal membuat data');
-            }
+        $wo = $this->db->insert('work_order', $fields, $values);
+
+        if($wo) {
+            return array('status'=> true, 'id'=> $wo);
         } else {
-            return array('status'=> false, 'msg'=> 'asset telah ada pada work order.');
+            return array('status'=> false, 'msg'=> 'gagal membuat data');
         }
     }
 

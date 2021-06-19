@@ -17,6 +17,48 @@ class Backupleader extends Model {
         return array('status'=> false, 'msg'=> 'Username atau password salah.');
     }
 
+    public function profile($id) {
+        $result = $this->db->selectColumns(array('id', 'fullname', 'username'), 'backupleader', 'id = ?', array($id));
+
+        if($result) {
+            return array('status'=> true, 'data'=> array('id'=> $result['id'], 'name'=> $result['first_name'].' '.$result['last_name'], 'username'=> $result['username']));
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find profile');
+        }
+    }
+
+    public function changeUsername(int $id, string $username) {
+        $check_username = $this->checkUsernameExists($username);
+
+        if($check_username) {
+            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        } else {
+            $fields = array('username');
+            $values = array($username);
+
+            $result = $this->db->update('backupleader', $fields, $values, 'id = '.$id_admin);
+
+            if($result > 0) {
+                return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'username'=> $username));
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
+            }
+        }
+    }
+
+    public function changePassword(int $id, string $password) {
+        $fields = array('password');
+        $values = array(password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]));
+
+        $result = $this->db->update('backupleader', $fields, $values, 'id = '.$id);
+
+        if($result) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui password.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui password.');
+        }
+    }
+
     private function checkAccountBackupLeaderExists($username) {
         $backupleaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'backupleader', 'username = ?', array($username));
 
@@ -46,22 +88,16 @@ class Backupleader extends Model {
         }
     }
 
-    public function editRecord(int $id_backupleader, string $first_name, string $last_name, string $username, int $location) {
-        $checkusername = $this->checkAccountBackupLeaderExists($username);
+    public function editRecord(int $id_backupleader, string $first_name, string $last_name, int $location) {
+        $fields = array('first_name', 'last_name', 'location');
+        $values = array($first_name, $last_name, $location);
 
-        if($checkusername) {
-            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        $backupleader_update = $this->db->update('backupleader', $fields, $values, 'id = '.$id_backupleader);
+
+        if($backupleader_update > 0) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $id_backupleader, 'firstname'=> $first_name, 'lastname'=> $last_name));
         } else {
-            $fields = array('first_name', 'last_name', 'username', 'location');
-            $values = array($first_name, $last_name, $username, $location);
-    
-            $backupleader_update = $this->db->update('backupleader', $fields, $values, 'id = '.$id_backupleader);
-    
-            if($backupleader_update > 0) {
-                return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $id_backupleader, 'firstname'=> $first_name, 'lastname'=> $last_name, 'username'=> $username));
-            } else {
-                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
-            }
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
         }
     }
 
@@ -85,7 +121,8 @@ class Backupleader extends Model {
         backupleader.first_name,
         backupleader.last_name,
         backupleader.username,
-        `location`.`name` as locationname
+        `location`.`name` as locationname,
+        backupleader.location
         FROM backupleader
         INNER JOIN `location` ON backupleader.location = `location`.id
         WHERE backupleader.first_name LIKE ? OR backupleader.last_name LIKE ? OR backupleader.username LIKE ?

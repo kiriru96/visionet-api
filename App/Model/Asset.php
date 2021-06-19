@@ -13,12 +13,12 @@ class Asset extends Model {
         }
     }
 
-    public function addAsset(int $id_device_name, int $id_device_brand, string $model, string $serial_number, string $description, int $id_warehouse) {
+    public function addAsset(int $id_device_name, int $id_device_brand, string $model, string $serial_number, string $description) {
         $checkAsset = $this->checkSerialNumberExists($serial_number);
 
         if(!$checkAsset) {
-            $fields = array('device_name', 'device_brand', 'model', 'serial_number', 'description', 'warehouse');
-            $values = array($id_device_name, $id_device_brand, $model, $serial_number, $description, $id_warehouse);
+            $fields = array('device_name', 'device_brand', 'model', 'serial_number', 'description');
+            $values = array($id_device_name, $id_device_brand, $model, $serial_number, $description);
     
             $asset = $this->db->insert('assets', $fields, $values);
     
@@ -38,9 +38,9 @@ class Asset extends Model {
         }
     }
 
-    public function editAsset(int $asset_id, int $id_device_name, int $id_device_brand, string $model, string $serial_number, string $description, int $id_warehouse) {
-        $fields = array('device_name', 'device_brand', 'model', 'serial_number', 'description', 'warehouse');
-        $values = array($id_device_name, $id_device_brand, $model, $serial_number, $description, $id_warehouse);
+    public function editAsset(int $asset_id, int $id_device_name, int $id_device_brand, string $model, string $serial_number, string $description) {
+        $fields = array('device_name', 'device_brand', 'model', 'serial_number', 'description');
+        $values = array($id_device_name, $id_device_brand, $model, $serial_number, $description);
 
         $asset = $this->db->update('assets', $fields, $values, 'id = '.$asset_id);
 
@@ -65,15 +65,10 @@ class Asset extends Model {
                         ass.model,
                         ass.serial_number,
                         ass.description,
-                        ass.warehouse AS warehouse_id,
-                        wh.name AS warehousename,
-                        ass.datecreated,
-                        wo.id AS workorder_id
+                        ass.datecreated
                     FROM assets AS ass 
                         INNER JOIN device_brand AS db ON ass.device_brand = db.id
                         INNER JOIN device_name AS dn ON ass.device_name = dn.id
-                        INNER JOIN warehouse AS wh ON ass.warehouse = wh.id
-                        LEFT JOIN work_order AS wo ON wo.asset = ass.id
                     WHERE
                         ass.serial_number LIKE ?
                     ORDER BY ass.id DESC LIMIT '.$index.', '.$limit;

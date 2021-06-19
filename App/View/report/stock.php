@@ -1,0 +1,20 @@
+<!Doctype html>
+<html>
+    <head>
+    </head>
+    <body>
+        <table>
+            <thead>
+                <tr>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

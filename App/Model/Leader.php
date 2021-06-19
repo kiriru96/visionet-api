@@ -17,6 +17,48 @@ class Leader extends Model {
         return array('status'=> false, 'msg'=> 'Username atau password salah.');
     }
 
+    public function profile($id) {
+        $result = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username'), 'leader', 'id = ?', array($id));
+
+        if($result) {
+            return array('status'=> true, 'data'=> array('id'=> $result['id'], 'name'=> $result['first_name'].' '.$result['last_name'], 'username'=> $result['username']));
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find profile');
+        }
+    }
+
+    public function changeUsername(int $id, string $username) {
+        $check_username = $this->checkUsernameExists($username);
+
+        if($check_username) {
+            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        } else {
+            $fields = array('username');
+            $values = array($username);
+
+            $result = $this->db->update('leader', $fields, $values, 'id = '.$id_admin);
+
+            if($result > 0) {
+                return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'username'=> $username));
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
+            }
+        }
+    }
+
+    public function changePassword(int $id, string $password) {
+        $fields = array('password');
+        $values = array(password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]));
+
+        $result = $this->db->update('leader', $fields, $values, 'id = '.$id);
+
+        if($result) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui password.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui password.');
+        }
+    }
+
     private function checkAccountLeaderExists($username) {
         $leaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'leader', 'username = ?', array($username));
 
@@ -46,22 +88,16 @@ class Leader extends Model {
         }
     }
 
-    public function editRecord(int $id_leader, string $first_name, string $last_name, string $username, int $location) {
-        $checkusername = $this->checkAccountLeaderExists($username);
+    public function editRecord(int $id_leader, string $first_name, string $last_name, int $location) {
+        $fields = array('first_name', 'last_name', 'location');
+        $values = array($first_name, $last_name, $location);
 
-        if($checkusername) {
-            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        $leader_update = $this->db->update('leader', $fields, $values, 'id = '.$id_leader);
+
+        if($leader_update > 0) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $id_leader, 'firstname'=> $first_name, 'lastname'=> $last_name));
         } else {
-            $fields = array('first_name', 'last_name', 'username', 'location');
-            $values = array($first_name, $last_name, $username, $location);
-
-            $leader_update = $this->db->update('leader', $fields, $values, 'id = '.$id_leader);
-
-            if($leader_update > 0) {
-                return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $id_leader, 'firstname'=> $first_name, 'lastname'=> $last_name, 'username'=> $username));
-            } else {
-                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
-            }
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
         }
     }
 

@@ -17,6 +17,48 @@ class Admin extends Model {
         return array('status'=> false, 'msg'=> 'username atau password salah.');
     }
 
+    public function profile($id) {
+        $result = $this->db->selectColumns(array('id', 'fullname', 'username'), 'admin', 'id = ?', array($id));
+
+        if($result) {
+            return array('status'=> true, 'data'=> array('id'=> $result['id'], 'name'=> $result['fullname'], 'username'=> $result['username']));
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find profile');
+        }
+    }
+
+    public function changeUsername(int $id, string $username) {
+        $check_username = $this->checkUsernameExists($username);
+
+        if($check_username) {
+            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        } else {
+            $fields = array('username');
+            $values = array($username);
+
+            $result = $this->db->update('admin', $fields, $values, 'id = '.$id_admin);
+
+            if($result > 0) {
+                return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'fullname'=> $fullname, 'username'=> $username));
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
+            }
+        }
+    }
+
+    public function changePassword(int $id, string $password) {
+        $fields = array('password');
+        $values = array(password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]));
+
+        $result = $this->db->update('admin', $fields, $values, 'id = '.$id);
+        
+        if($result) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui password.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui password.');
+        }
+    }
+
     private function checkUsernameExists($username) {
         $admins = $this->db->selectColumns(array('id', 'fullname', 'username', 'level', 'password'), 'admin', 'username = ?', array($username));
 
@@ -42,8 +84,8 @@ class Admin extends Model {
         return array('status' => false, 'msg'=> 'username is exists.');
     }
 
-    public function deleteRecord(int $delete_id, int $admin_id) {
-        $delete_admin = $this->db->delete('admin', 'id = ?', array($admin_id));
+    public function deleteRecord(int $delete_id) {
+        $delete_admin = $this->db->delete('admin', 'id = ?', array($delete_id));
 
         if($delete_admin > 0) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus.');
@@ -52,12 +94,12 @@ class Admin extends Model {
         }
     }
 
-    public function listRecord(string $search, int $page, string $sortby, $sort, int $rows) {
+    public function listRecord(string $search, int $page, string $orderby, string $order, int $limit) {
         $index = ($page - 1) * $limit;
 
         $src = '%'.trim($search).'%';
 
-        $list_admins = $this->db->selectColumns(array('id', 'name'), 'admin', ' fullname LIKE ? OR username LIKE ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src, $src));
+        $list_admins = $this->db->selectColumns(array('id', 'fullname', 'username'), 'admin', ' fullname LIKE ? OR username LIKE ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src, $src));
 
         if($list_admins) {
             return array('status'=> true, 'data'=> $list_admins);
@@ -66,22 +108,28 @@ class Admin extends Model {
         }
     }
 
-    public function editRecord(int $id_admin, string $fullname, string $username) {
-        $check_username = $this->checkUsernameExists($username);
+    public function editRecord(int $id_admin, string $fullname) {
+        $fields = array('fullname');
+        $values = array($fullname);
 
-        if($check_username) {
-            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        $result = $this->db->update('admin', $fields, $values, 'id = '.$id_admin);
+
+        if($result > 0) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'fullname'=> $fullname));
         } else {
-            $fields = array('fullname', 'username');
-            $values = array($fullname, $username);
-
-            $result = $this->db->update($fields, $values, 'admin', 'id = '.$id_admin);
-
-            if($result > 0) {
-                return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'fullname'=> $fullname, 'username'=> $username));
-            } else {
-                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
-            }
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
         }
+    }
+    
+    public function allRows(string $search) {
+        $src = '%'.trim($search).'%';
+
+        $query = 'SELECT count(*) AS len 
+        FROM admin
+        WHERE fullname LIKE ? OR username LIKE ?';
+
+        $res = $this->db->rawQueryType('select', $query, array($src, $src));
+
+        return $res[0]['len'];
     }
 }

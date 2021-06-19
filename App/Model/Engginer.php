@@ -17,6 +17,48 @@ class Engginer extends Model {
         return array('status'=> false, 'msg'=> 'Username atau password salah.');
     }
 
+    public function profile($id) {
+        $result = $this->db->selectColumns(array('id', 'fullname', 'username'), 'admin', 'id = ?', array($id));
+
+        if($result) {
+            return array('status'=> true, 'data'=> array('id'=> $result['id'], 'name'=> $result['first_name'].' '.$result['last_name'], 'username'=> $result['username']));
+        } else {
+            return array('status'=> false, 'msg'=> 'cannot find profile');
+        }
+    }
+
+    public function changeUsername(int $id, string $username) {
+        $check_username = $this->checkUsernameExists($username);
+
+        if($check_username) {
+            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        } else {
+            $fields = array('username');
+            $values = array($username);
+
+            $result = $this->db->update('engginer', $fields, $values, 'id = '.$id_admin);
+
+            if($result > 0) {
+                return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'username'=> $username));
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
+            }
+        }
+    }
+
+    public function changePassword(int $id, string $password) {
+        $fields = array('password');
+        $values = array(password_hash($password, PASSWORD_BCRYPT, ['cost'=>12]));
+
+        $result = $this->db->update('engginer', $fields, $values, 'id = '.$id);
+
+        if($result) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui password.');
+        } else {
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui password.');
+        }
+    }
+
     private function checkAccountEngginerExists($username) {
         $engginers = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password'), 'engginer', 'username = ?', array($username));
 
@@ -46,22 +88,16 @@ class Engginer extends Model {
         }
     }
 
-    public function editRecord(int $id_engginer, string $first_name, string $last_name, string $username, int $location) {
-        $checkusername = $this->checkAccountEngginerExists($username);
+    public function editRecord(int $id_engginer, string $first_name, string $last_name, int $location) {
+        $fields = array('first_name', 'last_name', 'location');
+        $values = array($first_name, $last_name, $location);
 
-        if($checkusername) {
-            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        $engginer_update = $this->db->update('engginer', $fields, $values, 'id = '.$id_engginer);
+
+        if($engginer_update > 0) {
+            return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $id_engginer, 'firstname'=> $first_name, 'lastname'=> $last_name));
         } else {
-            $fields = array('first_name', 'last_name', 'username', 'location');
-            $values = array($first_name, $last_name, $username, $location);
-
-            $engginer_update = $this->db->update('engginer', $fields, $values, 'id = '.$id_engginer);
-
-            if($engginer_update > 0) {
-                return array('status'=> true, 'msg'=> 'berhasil memperbaharui.', 'data'=> array('id'=> $id_engginer, 'firstname'=> $first_name, 'lastname'=> $last_name, 'username'=> $username));
-            } else {
-                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
-            }
+            return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
         }
     }
 
@@ -106,7 +142,8 @@ class Engginer extends Model {
             engginer.first_name,
             engginer.last_name,
             engginer.username,
-            `location`.`name` as locationname
+            `location`.`name` as locationname,
+            engginer.location
             FROM engginer
             INNER JOIN `location` ON engginer.location = `location`.id
             WHERE engginer.first_name LIKE ? OR engginer.last_name LIKE ? OR engginer.username LIKE ?
