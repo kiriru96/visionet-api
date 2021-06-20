@@ -72,7 +72,7 @@ class Api extends Controller {
                 $this->name     = $token->name;
                 $this->username = $token->username;
 
-                if(($this->type === 1 || $this->type === 2) && $token->location) {
+                if(($this->type !== 0) && $token->location) {
                     $this->location = $token->location;
                 }
 
@@ -616,7 +616,7 @@ class Api extends Controller {
     // api for leader and backup leader
 
     public function workorderdetail() {
-        if($this->req?->getMethod() === 'GET' && ($this->type === 1 || $this->type == 2)) {
+        if($this->req?->getMethod() === 'GET') {
             $this->loadModel('wo', new Workorder());
 
             $id = (int) $this->req?->Get('id');
@@ -715,14 +715,14 @@ class Api extends Controller {
             $dateselect = $this->req?->Get('date');
             $page       = $this->req?->Get('page');
 
-            $this->loadModel('woec', new Woec());
+            $this->loadModel('wo', new Workorder());
 
-            $result = $this->woec->listRecord($dateselect, $page);
+            $result = $this->wo->listWorkOrderEngginer($dateselect, $page, $this->id, $this->location);
 
             if($result['status']) {
-                return array('status'=> true, 'data'=> $result['data']);
+                return $this->res->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
             } else {
-                return array('status'=> false, 'msg'=> $result['msg']);
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
             }
         }
 
@@ -731,19 +731,27 @@ class Api extends Controller {
 
     public function listwoec($action) {
         if($this->req?->getMethod() === 'GET' && $this->type === 3) {
-            $id_engginer    = $this->id;
+            $id_engginer    = (int) $this->id;
             
             $dateselect = $this->req?->Get('date');
-            $page       = $this->req?->Get('page');
+            $page       = (int) $this->req?->Get('page');
 
             $this->loadModel('woec', new Woec());
 
-            $result = $this->woec->listRecord($id_engginer, $dateselect, $page);
+            $result = null;
+
+            if($action === 'progress') {
+                $result = $this->woec->listProgress($dateselect, $page, $id_engginer);
+            } else if($action === 'close') {
+                $result = $this->woec->listClose($dateselect, $page, $id_engginer);
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'Permintaan gagal.'));
+            }
 
             if($result['status']) {
-                return array('status'=> true, 'data'=> $result['data']);
+                return $this->res?->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
             } else {
-                return array('status'=> false, 'msg'=> $result['msg']);
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
             }
         }
 
@@ -752,13 +760,20 @@ class Api extends Controller {
 
     public function submitwoec() {
         if($this->req?->getMethod() === 'POST' && $this->type === 3) {
-            $id_engginer    = $this->id;
-            $id_work_order  = $this->req?->Post('idwo');
+            $id_engginer    = (int) $this->id;
+            $id_work_order  = (int) $this->req?->Post('idwo');
+            $descs = $this->req?->Post('desc');
+
+            $this->loadModel('woec', new Woec());
+
+            $desc_list = json_encode($descs);
 
             $images_uploads = array();
-            $length_images  = count($_FILES['woimages']['name']);
+            $length_images  = count($_FILES['image']['name']);
 
-            $folder_wo_images = __DIR__.'/public/'.$id_work_order.date('Ymd');
+            $folder_images = $id_work_order.date('Ymdhis');
+
+            $folder_wo_images = __DIR__.'../../../public/uploads/'.$folder_images;
 
             if(!is_dir($folder_wo_images)) {
                 mkdir($folder_wo_images);
@@ -766,20 +781,28 @@ class Api extends Controller {
             
             if($length_images <= 6 && $length_images > 0) {
                 for($index = 0; $index < $length_images; $index++) {
-                    $uploadfiles = $_FILES['woimages']['tmp_name'][$index];
+                    $uploadfiles = $_FILES['image']['tmp_name'][$index];
 
                     $check_image = getimagesize($uploadfiles);
 
                     if($check_image) {
-                        $image_file_type = strtolower(pathinfo($_FILES['woimages']['name'][$index], PATHINFO_EXTENSION));
+                        $image_file_type = strtolower(pathinfo($_FILES['image']['name'][$index], PATHINFO_EXTENSION));
                         
-                        if(image_file_type === 'jpg' || $image_file_type === 'jpeg') {
+                        if($image_file_type === 'jpg' || $image_file_type === 'jpeg') {
                             $dest = $folder_wo_images.'/'.$index.'.'.$image_file_type;
+                            $img_dest = $folder_images.'/'.$index.'.'.$image_file_type;
                             if(move_uploaded_file($uploadfiles, $dest)) {
-                                array_push($images_uploads, $dest);
+                                array_push($images_uploads, $img_dest);
                             }
                         }
                     }
+                }
+                $result = $this->woec->addWorkOrderConfirm($id_work_order, json_encode($images_uploads), $desc_list, $id_engginer);
+
+                if($result['status']) {
+                    return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
+                } else {
+                    return $this->res->json(array('status'=> false, 'msg'=> 'Gagal submit.'));
                 }
             } else {
                 return $this->res->json(array('status'=> false, 'msg'=> 'images is more than 6 or empty'));

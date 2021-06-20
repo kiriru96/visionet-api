@@ -272,6 +272,7 @@ class PDODriver extends Database{
 		$result = null;
 		$block = explode(' ',$query);
 		$db = null;
+		
 		if($block == null || $block[0] == ''){
 			return false;
 		}else{

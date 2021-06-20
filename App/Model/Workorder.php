@@ -110,6 +110,33 @@ class Workorder extends Model {
         }
     }
 
+    public function listWorkOrderEngginer(string $date, int $page, int $engginer, int $location) {
+        $index = ($page - 1) * 20;
+
+        $query = 'SELECT
+            wo.id,
+            dn.name AS devicename,
+            db.name AS brandname,
+            cus.name AS customername
+            FROM work_order AS wo
+            INNER JOIN customer AS cus ON wo.customer = cus.id
+            INNER JOIN location AS loc ON wo.location = loc.id
+            INNER JOIN assets AS ass ON wo.asset = ass.id
+            INNER JOIN device_name AS dn ON ass.device_name = dn.id
+            INNER JOIN device_brand AS db ON ass.device_brand = db.id
+            LEFT JOIN work_order_engginer_confirm AS woec ON wo.id = woec.work_order
+            WHERE DATE(wo.datecreated) = ? AND wo.engginer = ? AND wo.location = ? AND woec.work_order IS NULL
+            ORDER BY wo.datecreated DESC LIMIT '.$index.', 20';
+
+        $list_works = $this->db->rawQueryType('select', $query, array($date, $engginer, $location));
+
+        if($list_works) {
+            return array('status'=> true, 'data'=> $list_works);
+        } else {
+            return array('status'=> false, 'msg'=> 'tidak ada list.');
+        }
+    }
+
     public function listWorkOrderReq(string $date, int $page, int $location) {
         $index = ($page - 1) * 20;
 
@@ -125,8 +152,12 @@ class Workorder extends Model {
                 INNER JOIN assets as ass ON wo.asset = ass.id
                 INNER JOIN device_name as dn ON ass.device_name = dn.id
                 INNER JOIN device_brand as db ON ass.device_brand = db.id
-                WHERE DATE(wo.datecreated) = ? AND wo.location = ?
+                LEFT JOIN work_order_engginer_confirm AS woec ON woec.work_order = wo.id
+                WHERE DATE(wo.datecreated) = ? AND wo.location = ? AND woec.work_order IS NULL
                 ORDER BY wo.datecreated DESC LIMIT '.$index.',20';
+
+        echo $query;
+        die();
 
         $list_works = $this->db->rawQueryType('select', $query, array($date, $location));
 
@@ -159,6 +190,31 @@ class Workorder extends Model {
             return array('status'=> true, 'data'=> $wo[0]);
         } else {
             return array('status'=> false, 'msg'=> 'tidak menemukan data.');
+        }
+    }
+
+    public function report(string $datestart, string $dateend) {
+        $query = 'SELECT
+            loc.name AS locationname,
+            cus.name AS customername,
+            dn.name AS devicename,
+            db.name AS brandname,
+            engginer.first_name AS firstname,
+            engginer.last_name AS lastname
+            FROM work_order AS wo
+            INNER JOIN assets AS ass ON ass.id = wo.asset
+            INNER JOIN device_name AS dn ON dn.id = ass.device_name
+            INNER JOIN device_brand AS db ON db.id = ass.device_brand
+            INNER JOIN engginer AS engg ON engg.id = wo.engginer
+            INNER JOIN customer As cus ON cus.id = wo.customer
+            INNER JOIN location AS loc ON loc.id = wo.location
+            WHERE DATE(wo.datecreated) BETWEEN ? AND ?
+            ORDER BY DATE wo.datecreated ASC';
+
+        $result = $this->db->rawQueryType('select', $query, array($datestart, $dateend));
+
+        if($result) {
+            return array('status'=> true, )
         }
     }
 

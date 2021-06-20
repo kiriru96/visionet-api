@@ -188,6 +188,58 @@ class Asset extends Model {
         return $res[0]['len'];
     }
 
+    public function report_stock_out(string $datestart, string $dateend) {
+        $query = 'SELECT
+            dn.name AS devicename,
+            db.name AS brandname,
+            ass.serial_number,
+            ass.model,
+            adm.fullname AS adminname,
+            soh.datecreated,
+            soh.count_input
+            FROM stock_out_history AS soh
+            INNER JOIN assets AS ass ON ass.id = soh.asset_id
+            INNER JOIN admin AS adm ON adm.id = soh.id_account
+            INNER JOIN device_name AS dn ON dn.id = ass.device_name
+            INNER JOIN device_brand AS db ON db.id = ass.device_brand
+            WHERE soh.status = ? AND DATE(soh.datecreated) BETWEEN ? AND ?
+            ORDER BY soh.datecreated ASC';
+        
+        $result = $this->db->rawQueryType('select', $query, array(1, $datestart, $dateend));
+
+        if($result) {
+
+        } else {
+
+        }
+    }
+
+    public function report_stock_in(string $datestart, string $dateend) {
+        $query = 'SELECT
+            dn.name AS devicename,
+            db.name AS brandname,
+            ass.serial_number,
+            ass.model,
+            adm.fullname AS adminname,
+            soh.datecreated,
+            soh.count_input
+            FROM stock_in_history AS sih
+            INNER JOIN assets AS ass ON ass.id = sih.asset_id
+            INNER JOIN admin AS adm ON adm.id = sih.id_account
+            INNER JOIN device_name AS dn ON dn.id = ass.device_name
+            INNER JOIN device_brand AS db ON db.id = ass.device_brand
+            WHERE sih.status = ? AND DATE(sih.datecreated) BETWEEN ? AND ?
+            ORDER BY sih.datecreated ASC';
+        
+        $result = $this->db->rawQueryType('select', $query, array(1, $datestart, $dateend));
+
+        if($result) {
+
+        } else {
+            
+        }
+    }
+
     public function allRowsCustom(string $column, int $type) {
 
         $query = 'SELECT 

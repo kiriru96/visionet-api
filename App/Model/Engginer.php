@@ -10,7 +10,7 @@ class Engginer extends Model {
             $hash_password = $engginer['password'];
 
             if(password_verify($password, $hash_password)) {
-                return array('status'=> true, 'data'=> array('id'=> $engginer['id'], 'type'=> 3, 'username'=> $engginer['username'], 'name'=> $engginer['first_name'].' '.$engginer['last_name']));
+                return array('status'=> true, 'data'=> array('id'=> $engginer['id'], 'type'=> 3, 'username'=> $engginer['username'], 'name'=> $engginer['first_name'].' '.$engginer['last_name'], 'location'=> $engginer['location']));
             }
         }
 
@@ -60,7 +60,7 @@ class Engginer extends Model {
     }
 
     private function checkAccountEngginerExists($username) {
-        $engginers = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password'), 'engginer', 'username = ?', array($username));
+        $engginers = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'engginer', 'username = ?', array($username));
 
         if($engginers) {
             return $engginers[0];

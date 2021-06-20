@@ -41,6 +41,26 @@ class Response{
 		return $this;
 	}
 
+	public function rendertosheet($view, $data = array(), $filename){
+		header('Content-Type: application/vnd.ms-excel');
+		header('Content-Disposition: attachment; filename='.$filename);
+		array_push($data, array('print'=> true));
+		$path = APP.DS.'View'.DS.$view.'.php';
+		if(file_exists($path)){
+			extract($data);
+
+			ob_start();
+			include($path);
+
+			$strView = ob_get_contents();
+
+			ob_end_clean();
+			echo $this->parser($strView, $data);
+		}
+		unset($data);
+		return $this;
+	}
+
 	protected function parser($template, $data, $minify=true){
 		$matches = array();
 		preg_match_all('/{{include+\s+[\w\/]+}}/', $template, $matches);
