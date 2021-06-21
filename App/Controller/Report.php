@@ -4,6 +4,32 @@ use System\Controller as Controller;
 use App\Model\Asset as Asset;
 
 class Report extends Controller {
+    public function stockin() {
+        if($this->req?->getMethod() === 'GET') {
+            $startdate  = $this->req?->Get('startdate');
+            $enddate     = $this->req?->Get('enddate');
+
+            $this->loadModel('asset', new Asset());
+            
+            $result = $this->asset->report_stock_in($startdate, $enddate);
+
+            return $this->res?->render('report/asset', array('table'=>$result['data']));
+        }
+    }
+
+    public function stockout() {
+        if($this->req?->getMethod() === 'GET') {
+            $startdate  = $this->req?->Get('startdate');
+            $enddate     = $this->req?->Get('enddate');
+
+            $this->loadModel('asset', new Asset());
+            
+            $result = $this->asset->report_stock_out($startdate, $enddate);
+
+            return $this->res?->render('report/asset', array('table'=>$result['data']));
+        }
+    }
+
     public function assets($model) {
         if($this->req?->getMethod() === 'GET') {
             if($model === 'in') {

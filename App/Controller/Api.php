@@ -855,7 +855,7 @@ class Api extends Controller {
     }
 
     public function addstockhistory($model) {
-        if($this->req?->getMethod() === 'POST') {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
             if($model === 'in') {
                 $this->loadModel('stock', new StockIn());
             } else if($model === 'out') {
@@ -867,13 +867,45 @@ class Api extends Controller {
     }
 
     public function liststockhistory($model) {
-        if($this->req?->getMethod() === 'GET') {
+        if($this->req?->getMethod() === 'GET' && $this->type === 0) {
             if($model === 'in') {
                 $this->loadModel('stock', new StockIn());
             } else if($model === 'out') {
                 $this->loadModel('stock', new StockOut());
             } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
 
+            $result = $this->stock->listStock($this->id, 0);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function submitallstockhistory($model) {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
+            if($model === 'in') {
+                $this->loadModel('stock', new StockIn());
+            } else if($model === 'out') {
+                $this->loadModel('stock', new StockOut());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $adminid = $this->id;
+
+            $result = $this->stock->submitstock($adminid);
+
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'msg'=> 'berhasil memasukan data.'));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> 'gagal memasukan data.'));
             }
         }
 
@@ -881,13 +913,25 @@ class Api extends Controller {
     }
 
     public function submitstockhistory($model) {
-        if($this->req?->getMethod() === 'POST') {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
             if($model === 'in') {
                 $this->loadModel('stock', new StockIn());
             } else if($model === 'out') {
                 $this->loadModel('stock', new StockOut());
             } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
 
+            $adminid    = $this->id;
+            $assetid    = (int) $this->req?->Post('assetid');
+            $quantity   = (int) $this->req?->Post('quantity');
+
+            $result = $this->stock->newStock($assetid, $quantity, $adminid);
+
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'msg'=> 'berhasil memasukan data.'));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
             }
         }
 
@@ -895,13 +939,22 @@ class Api extends Controller {
     }
 
     public function deletestockhistory($model) {
-        if($this->req?->getMethod() === 'POST') {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
             if($model === 'in') {
                 $this->loadModel('stock', new StockIn());
             } else if($model === 'out') {
                 $this->loadModel('stock', new StockOut());
             } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+            $assetid = (int) $this->req?->Post('assetid');
 
+            $result = $this->stock->deleteStock($assetid, $this->id);
+            
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'msg'=> 'berhasil menghapus data.'));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> 'gagal menghapus data.'));
             }
         }
 
@@ -920,5 +973,59 @@ class Api extends Controller {
         }
 
         return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function searchasset() {
+        if($this->req?->getMethod() === 'GET') {
+            $search = $this->req?->Get('search');
+
+            $this->loadModel('asset', new Asset());
+
+            $result = $this->asset->searchAsset($search);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function reportstockout() {
+        if($this->req?->getMethod() === 'GET') {
+            $startdate  = $this->req?->Get('startdate');
+            $enddate     = $this->req?->Get('enddate');
+
+            $this->loadModel('asset', new Asset());
+
+            $result = $this->asset->report_stock_out($startdate, $enddate);
+            
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function reportstockin() {
+        if($this->req?->getMethod() === 'GET') {
+            $startdate  = $this->req?->Get('startdate');
+            $enddate     = $this->req?->Get('enddate');
+
+            $this->loadModel('asset', new Asset());
+
+            $result = $this->asset->report_stock_in($startdate, $enddate);
+            
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
     }
 }

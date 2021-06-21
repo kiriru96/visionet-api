@@ -160,7 +160,31 @@ class Asset extends Model {
         }
     }
 
-    public function reportTable($date) {
+    public function searchAsset(string $search) {
+        $src = '%'.trim($search).'%';
+
+        $query = 'SELECT 
+            ass.id AS assetid,
+            ass.stock_available,
+            dn.name AS devicename,
+            db.name AS brandname,
+            ass.serial_number
+            FROM assets AS ass
+            INNER JOIN device_name AS dn ON dn.id = ass.device_name
+            INNER JOIN device_brand AS db ON db.id = ass.device_brand
+            WHERE ass.serial_number LIKE ? OR dn.name LIKE ?
+            ORDER BY ass.id ASC LIMIT 0, 20';
+
+        $result = $this->db->rawQueryType('select', $query, array($src, $src));
+
+        if($result) {
+            return array('status'=> true, 'data'=> $result);
+        } else {
+            return array('status'=> false, 'msg'=> 'tidak ditemukan');
+        }
+    }
+
+    public function reportTable(string $date) {
         $query = 'SELECT
         FROM assets AS ass
         INNER JOIN device_name AS dn ON ass.device_name = dn.id
@@ -208,9 +232,9 @@ class Asset extends Model {
         $result = $this->db->rawQueryType('select', $query, array(1, $datestart, $dateend));
 
         if($result) {
-
+            return array('status'=> true, 'data'=> $result);
         } else {
-
+            return array('status'=> false, 'msg'=> 'Tidak menemukan data');
         }
     }
 
@@ -221,8 +245,8 @@ class Asset extends Model {
             ass.serial_number,
             ass.model,
             adm.fullname AS adminname,
-            soh.datecreated,
-            soh.count_input
+            sih.datecreated,
+            sih.count_input
             FROM stock_in_history AS sih
             INNER JOIN assets AS ass ON ass.id = sih.asset_id
             INNER JOIN admin AS adm ON adm.id = sih.id_account
@@ -234,9 +258,9 @@ class Asset extends Model {
         $result = $this->db->rawQueryType('select', $query, array(1, $datestart, $dateend));
 
         if($result) {
-
+            return array('status'=> true, 'data'=> $result);
         } else {
-            
+            return array('status'=> false, 'msg'=> 'Tidak menemukan data');
         }
     }
 
