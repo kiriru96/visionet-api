@@ -170,13 +170,17 @@ class Workorder extends Model {
 
     public function detailWO(int $id) {
         $query = 'SELECT
+                woec.id AS engginer_submit_id,
                 wo.id,
                 ass.id AS asset_id,
                 dn.name AS devicename,
                 db.name AS brandname,
                 loc.name AS locationname,
-                cus.name AS customername
+                cus.name AS customername,
+                woec.pic_list,
+                woec.desc_list
                 FROM work_order AS wo
+                LEFT JOIN work_order_engginer_confirm AS woec ON wo.id = woec.work_order
                 INNER JOIN customer as cus ON wo.customer = cus.id
                 INNER JOIN location as loc ON wo.location = loc.id
                 INNER JOIN assets as ass ON wo.asset = ass.id
@@ -200,7 +204,10 @@ class Workorder extends Model {
             dn.name AS devicename,
             db.name AS brandname,
             engginer.first_name AS firstname,
-            engginer.last_name AS lastname
+            engginer.last_name AS lastname,
+            ass.serial_number AS inventory_code,
+            ass.model,
+            wo.datecreated
             FROM work_order AS wo
             INNER JOIN assets AS ass ON ass.id = wo.asset
             INNER JOIN device_name AS dn ON dn.id = ass.device_name
@@ -208,13 +215,15 @@ class Workorder extends Model {
             INNER JOIN engginer AS engg ON engg.id = wo.engginer
             INNER JOIN customer As cus ON cus.id = wo.customer
             INNER JOIN location AS loc ON loc.id = wo.location
-            WHERE DATE(wo.datecreated) BETWEEN ? AND ?
+            WHERE status = ? AND DATE(wo.datecreated) BETWEEN ? AND ?
             ORDER BY DATE wo.datecreated ASC';
 
-        $result = $this->db->rawQueryType('select', $query, array($datestart, $dateend));
+        $result = $this->db->rawQueryType('select', $query, array(1, $datestart, $dateend));
 
         if($result) {
-            return array('status'=> true, )
+            return array('status'=> true, 'data'=> $result);
+        } else {
+            return array('status'=> false, 'msg'=> 'Tidak ada data.');
         }
     }
 

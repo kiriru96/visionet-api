@@ -68,6 +68,19 @@ class Woec extends Model {
         }
     }
 
+    public function confirmWoec(int $id) {
+        $fields = array('status');
+        $values = array(1);
+
+        $result = $this->db->update('work_order_engginer_confirm', $fields, $values, 'id = '.$id);
+
+        if($result) {
+            return array('status'=> true, 'msg'=> 'berhasil.');
+        } else {
+            return array('status'=> false, 'msg'=> 'Gagal.');
+        }
+    }
+
     public function listClose(string $date, int $page, int $engginer) {
         $index = ($page - 1) * 20;
 

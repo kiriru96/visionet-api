@@ -132,4 +132,36 @@ class Admin extends Model {
 
         return $res[0]['len'];
     }
+
+    public function customerCount() {
+        $query = 'SELECT count(*) AS len FROM customer';
+
+        $result = $this->db->rawQueryType('select', $query, array());
+
+        return $result[0]['len'];
+    }
+
+    public function assetCount() {
+        $query = 'SELECT count(*) AS len FROM assets';
+
+        $result = $this->db->rawQueryType('select', $query, array());
+
+        return $result[0]['len'];
+    }
+
+    public function workorderCount() {
+        $query = 'SELECT count(*) AS len FROM work_order';
+
+        $result = $this->db->rawQueryType('select', $query, array());
+
+        return $result[0]['len'];
+    }
+
+    public function allstockCount() {
+        $query = 'SELECT SUM(stock_available) AS quantity FROM assets';
+
+        $result = $this->db->rawQueryType('select', $query, array());
+
+        return $result[0]['quantity'];
+    }
 }

@@ -145,28 +145,30 @@
         }    
             
         }
-        table, th, td
+        table, th, td, tr
         {
-        border-collapse:collapse;
-        border: 1px solid black;
-        width: 100%;
-        text-align: left;
-        padding: 10px;
-        }
-        td {
-            text-align: center;
+            border-collapse:collapse;
+            border: 1px solid black;
+            border-width: thin;
+            width: auto;
+            text-align: left;
+            padding: 10px;
         }
         img {
             object-fit: contain;
             width: 100%;
             height: 150px;
         }
+        .center {
+            margin-left: auto;
+            margin-right: auto;
+        }
         </style>
     </head>
-    <body>
+    <body id="content">
         <img src="../public/image/visionet.jpg"/>
         
-        <table>
+        <table class="center">
             <thead>
                 <tr>
                     <th class="text-left">

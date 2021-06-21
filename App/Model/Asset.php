@@ -65,7 +65,10 @@ class Asset extends Model {
                         ass.model,
                         ass.serial_number,
                         ass.description,
-                        ass.datecreated
+                        ass.datecreated,
+                        ass.stock_in,
+                        ass.stock_out,
+                        ass.stock_available
                     FROM assets AS ass 
                         INNER JOIN device_brand AS db ON ass.device_brand = db.id
                         INNER JOIN device_name AS dn ON ass.device_name = dn.id
@@ -278,5 +281,21 @@ class Asset extends Model {
         $res = $this->db->rawQueryType('select', $query, array());
 
         return $res[0]['len'];
+    }
+
+    public function getDetailAsset() {
+        $query = 'SELECT
+            SUM(stock_in) AS quantity_in,
+            SUM(stock_out) AS quantity_out,
+            SUM(stock_available) AS quantity_all
+            FROM assets';
+
+        $result = $this->db->rawQueryType('select', $query, array());
+
+        if($result) {
+            return array('status'=> true, 'data'=> $result[0]);
+        } else {
+            return array('status'=> false, 'msg'=> 'Terjadi kesalahan');
+        }
     }
 }

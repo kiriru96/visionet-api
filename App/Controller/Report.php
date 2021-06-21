@@ -2,12 +2,13 @@
 namespace App\Controller;
 use System\Controller as Controller;
 use App\Model\Asset as Asset;
+use App\Model\Workorder as Workorder;
 
 class Report extends Controller {
     public function stockin() {
         if($this->req?->getMethod() === 'GET') {
             $startdate  = $this->req?->Get('startdate');
-            $enddate     = $this->req?->Get('enddate');
+            $enddate    = $this->req?->Get('enddate');
 
             $this->loadModel('asset', new Asset());
             
@@ -20,13 +21,26 @@ class Report extends Controller {
     public function stockout() {
         if($this->req?->getMethod() === 'GET') {
             $startdate  = $this->req?->Get('startdate');
-            $enddate     = $this->req?->Get('enddate');
+            $enddate    = $this->req?->Get('enddate');
 
             $this->loadModel('asset', new Asset());
             
             $result = $this->asset->report_stock_out($startdate, $enddate);
 
             return $this->res?->render('report/asset', array('table'=>$result['data']));
+        }
+    }
+
+    public function workorder() {
+        if($this->req?->getMethod() === 'GET') {
+            $startdate  = $this->req?->Get('startdate');
+            $enddate    = $this->req?->Get('enddate');
+
+            $this->loadModel('wo', new Workorder());
+
+            $result = $this->wo->report($startdate, $enddate);
+
+            return $this->res?->render('report/workorder', array('table'=> $result['data']));
         }
     }
 

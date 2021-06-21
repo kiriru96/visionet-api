@@ -98,16 +98,29 @@ class Api extends Controller {
         $this->res?->json(array('version'=>'0.1.0', 'name'=>'visionet'));
     }
 
-    public function home() {
+    public function stock() {
         if($this->req?->getMethod() === 'GET') {
             $this->loadModel('asset', new Asset());
 
-            $asset_all          = $this->asset->allRows('');
-            $asset_new          = $this->asset->allRowsCustom('ass.condition_status', 1);
-            $asset_used         = $this->asset->allRowsCustom('ass.condition_status', 2);
-            $asset_repaired     = $this->asset->allRowsCustom('ass.condition_status', 3);
-            $asset_damaged      = $this->asset->allRowsCustom('ass.condition_status', 4);
-            $asset_dump         = $this->asset->allRowsCustom('ass.condition_status', 5);
+            $result = $this->asset->getDetailAsset();
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> $result['data']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot handle request.'));
+    }
+
+    public function home() {
+        if($this->req?->getMethod() === 'GET') {
+            $this->loadModel('admin', new Admin());
+
+            $customer   = $this->admin->customerCount();
+            $assets     = $this->admin->assetCount();
+            $wo         = $this->admin->workorderCount();
+            $stock      = $this->admin->allstockCount();
 
             // var_dump(array(
             //     'all'=> $asset_all, 
@@ -122,12 +135,10 @@ class Api extends Controller {
                 array(
                     'status'=> true, 
                     'data'=>array(
-                        'all'=> $asset_all, 
-                        'new'=> $asset_new,
-                        'used'=> $asset_used,
-                        'repaired'=> $asset_repaired,
-                        'damaged'=> $asset_damaged,
-                        'dump'=> $asset_dump)));
+                        'customer'=> $customer, 
+                        'assets'=> $assets,
+                        'wo'=> $wo,
+                        'stock'=> $stock)));
         }
         return $this->res?->json(array('status'=> false, 'msg'=> 'cannot handle request.'));
     }
@@ -692,14 +703,14 @@ class Api extends Controller {
 
     public function confirmwork() {
         if($this->req?->getMethod() === 'POST' && ($this->type === 1 || $this->type == 2)) {
-            $wo_id  = $this->req?->Post('idwo');
+            $woecid  = $this->req?->Post('id');
             
-            $this->loadModel('wo', new Workorder());
+            $this->loadModel('woec', new Woec());
 
-            $result = $this->wo->confitmWO($wo_id);
+            $result = $this->woec->confirmWoec($woecid);
 
             if($result['status']) {
-                return array('status'=> true, 'data'=> $result['data']);
+                return array('status'=> true, 'msg'=> $result['msg']);
             } else {
                 return array('status'=> false, 'msg'=> $result['msg']);
             }
