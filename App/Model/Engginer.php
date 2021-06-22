@@ -60,7 +60,7 @@ class Engginer extends Model {
     }
 
     private function checkAccountEngginerExists($username) {
-        $engginers = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'engginer', 'username = ?', array($username));
+        $engginers = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'engginer', 'username = ? AND deleted = ?', array($username, 0));
 
         if($engginers) {
             return $engginers[0];
@@ -102,7 +102,11 @@ class Engginer extends Model {
     }
 
     public function deleteRecord(int $id_engginer) {
-        $engginer_delete = $this->db->delete('engginer', 'id = ?', array($id_engginer));
+        $fields = array('deleted');
+        $values = array(1);
+
+        // $engginer_delete = $this->db->delete('engginer', 'id = ?', array($id_engginer));
+        $engginer_delete    = $this->db->update('engginer', $fields, $values, 'deleted = 0 AND id = '.$id_engginer);
 
         if($engginer_delete) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
@@ -120,10 +124,10 @@ class Engginer extends Model {
         first_name,
         last_name
         FROM engginer
-        WHERE username LIKE ?
+        WHERE username LIKE ? AND deleted = ?
         ORDER BY username ASC LIMIT 0, 20';
 
-        $list_engginers = $this->db->rawQueryType('select', $query, array($src));
+        $list_engginers = $this->db->rawQueryType('select', $query, array($src, 0));
 
         if($list_engginers) {
             return array('status'=> true, 'data'=> $list_engginers);
@@ -146,10 +150,10 @@ class Engginer extends Model {
             engginer.location
             FROM engginer
             INNER JOIN `location` ON engginer.location = `location`.id
-            WHERE engginer.first_name LIKE ? OR engginer.last_name LIKE ? OR engginer.username LIKE ?
+            WHERE (engginer.first_name LIKE ? OR engginer.last_name LIKE ? OR engginer.username LIKE ?) AND engginer.deleted = ?
             ORDER BY '.$orderby.' DESC LIMIT '.$index.', '.$limit;
 
-        $list_engginers = $this->db->rawQueryType('select', $query_engginers, array($src, $src, $src));
+        $list_engginers = $this->db->rawQueryType('select', $query_engginers, array($src, $src, $src, 0));
 
         if($list_engginers) {
             return array('status'=> true, 'data'=> $list_engginers);
@@ -185,9 +189,9 @@ class Engginer extends Model {
         $query = 'SELECT count(*) AS len 
         FROM engginer
         INNER JOIN `location` ON engginer.location = `location`.id
-        WHERE engginer.first_name LIKE ? OR engginer.last_name LIKE ? OR engginer.username LIKE ?';
+        WHERE (engginer.first_name LIKE ? OR engginer.last_name LIKE ? OR engginer.username LIKE ?) AND engginer.deleted = ?';
 
-        $res = $this->db->rawQueryType('select', $query, array($src, $src, $src));
+        $res = $this->db->rawQueryType('select', $query, array($src, $src, $src, 0));
 
         return $res[0]['len'];
     }

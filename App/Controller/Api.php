@@ -584,6 +584,24 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
     }
 
+    public function deleteworkorder() {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0) {
+            $this->loadModel('workorder', new WorkOrder());
+
+            $idwo       = (int) $this->req?->Post('id');
+
+            $result = $this->workorder->deleteWork($idwo);
+            
+            if($result['status']) {
+                return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));
+            } else {
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
+    }
+
     public function addworkorder() {
         if($this->req?->getMethod() === 'POST' && $this->type === 0) {
             $this->loadModel('workorder', new WorkOrder());

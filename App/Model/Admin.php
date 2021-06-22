@@ -60,7 +60,7 @@ class Admin extends Model {
     }
 
     private function checkUsernameExists($username) {
-        $admins = $this->db->selectColumns(array('id', 'fullname', 'username', 'level', 'password'), 'admin', 'username = ?', array($username));
+        $admins = $this->db->selectColumns(array('id', 'fullname', 'username', 'level', 'password'), 'admin', 'username = ? AND deleted = ?', array($username, 0));
 
         if($admins) {
             return $admins[0];
@@ -85,7 +85,11 @@ class Admin extends Model {
     }
 
     public function deleteRecord(int $delete_id) {
-        $delete_admin = $this->db->delete('admin', 'id = ?', array($delete_id));
+        $fields = array('deleted');
+        $values = array(1);
+
+        // $delete_admin = $this->db->delete('admin', 'id = ?', array($delete_id));
+        $delete_admin = $this->db->update('admin', $fields, $values, 'deleted = 0 AND id = '.$delete_id);
 
         if($delete_admin > 0) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus.');
@@ -99,7 +103,7 @@ class Admin extends Model {
 
         $src = '%'.trim($search).'%';
 
-        $list_admins = $this->db->selectColumns(array('id', 'fullname', 'username'), 'admin', ' fullname LIKE ? OR username LIKE ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src, $src));
+        $list_admins = $this->db->selectColumns(array('id', 'fullname', 'username'), 'admin', ' (fullname LIKE ? OR username LIKE ?) AND deleted = ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src, $src, 0));
 
         if($list_admins) {
             return array('status'=> true, 'data'=> $list_admins);
@@ -126,41 +130,41 @@ class Admin extends Model {
 
         $query = 'SELECT count(*) AS len 
         FROM admin
-        WHERE fullname LIKE ? OR username LIKE ?';
+        WHERE (fullname LIKE ? OR username LIKE ?) AND deleted = ?';
 
-        $res = $this->db->rawQueryType('select', $query, array($src, $src));
+        $res = $this->db->rawQueryType('select', $query, array($src, $src, 0));
 
         return $res[0]['len'];
     }
 
     public function customerCount() {
-        $query = 'SELECT count(*) AS len FROM customer';
+        $query = 'SELECT count(*) AS len FROM customer WHERE deleted = ?';
 
-        $result = $this->db->rawQueryType('select', $query, array());
+        $result = $this->db->rawQueryType('select', $query, array(0));
 
         return $result[0]['len'];
     }
 
     public function assetCount() {
-        $query = 'SELECT count(*) AS len FROM assets';
+        $query = 'SELECT count(*) AS len FROM assets WHERE deleted = ?';
 
-        $result = $this->db->rawQueryType('select', $query, array());
+        $result = $this->db->rawQueryType('select', $query, array(0));
 
         return $result[0]['len'];
     }
 
     public function workorderCount() {
-        $query = 'SELECT count(*) AS len FROM work_order';
+        $query = 'SELECT count(*) AS len FROM work_order WHERE deleted = ?';
 
-        $result = $this->db->rawQueryType('select', $query, array());
+        $result = $this->db->rawQueryType('select', $query, array(0));
 
         return $result[0]['len'];
     }
 
     public function allstockCount() {
-        $query = 'SELECT SUM(stock_available) AS quantity FROM assets';
+        $query = 'SELECT SUM(stock_available) AS quantity FROM assets WHERE deleted = ?';
 
-        $result = $this->db->rawQueryType('select', $query, array());
+        $result = $this->db->rawQueryType('select', $query, array(0));
 
         return $result[0]['quantity'];
     }

@@ -29,7 +29,11 @@ class Asset extends Model {
     }
 
     public function deleteRecord(int $id_asset) {
-        $asset_delete = $this->db->delete('assets', 'id = ?', array($id_asset));
+        $fields = array('deleted');
+        $values = array(1);
+
+        // $asset_delete = $this->db->delete('assets', 'id = ?', array($id_asset));
+        $asset_delete = $this->db->update('assets', $fields, $values, 'deleted = 0 AND id = '.$id_asset);
 
         if($asset_delete > 0) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus.');
@@ -73,10 +77,10 @@ class Asset extends Model {
                         INNER JOIN device_brand AS db ON ass.device_brand = db.id
                         INNER JOIN device_name AS dn ON ass.device_name = dn.id
                     WHERE
-                        ass.serial_number LIKE ?
+                        (ass.serial_number LIKE ? OR dn.name LIKE ?) AND ass.deleted = ?
                     ORDER BY ass.id DESC LIMIT '.$index.', '.$limit;
 
-        $list_assets = $this->db->rawQueryType('select', $query, array($src));
+        $list_assets = $this->db->rawQueryType('select', $query, array($src, $src, 0));
 
         if($list_assets) {
             return array('status'=> true, 'data'=> $list_assets);
@@ -208,9 +212,11 @@ class Asset extends Model {
     public function allRows(string $search) {
         $src = '%'.trim($search).'%';
 
-        $query = 'SELECT count(*) AS len FROM assets WHERE serial_number LIKE ?';
+        $query = 'SELECT count(*) AS len FROM assets AS ass
+            INNER JOIN device_name AS dn ON dn.id = ass.device_name
+            WHERE (ass.serial_number LIKE ? OR dn.name LIKE ?) AND ass.deleted = ?';
 
-        $res = $this->db->rawQueryType('select', $query, array($src));
+        $res = $this->db->rawQueryType('select', $query, array($src, $src, 0));
 
         return $res[0]['len'];
     }
@@ -276,9 +282,9 @@ class Asset extends Model {
                 INNER JOIN device_brand AS db ON ass.device_brand = db.id 
                 INNER JOIN warehouse AS wh ON ass.warehouse = wh.id
                 INNER JOIN conditions AS cond ON ass.condition_status = cond.id
-                WHERE '.$column.' = '.$type;
+                WHERE '.$column.' = '.$type.' AND ass.deleted = ?';
         
-        $res = $this->db->rawQueryType('select', $query, array());
+        $res = $this->db->rawQueryType('select', $query, array(0));
 
         return $res[0]['len'];
     }

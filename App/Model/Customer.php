@@ -33,7 +33,11 @@ class Customer extends Model {
     }
 
     public function deleteRecord(int $id_customer) {
-        $delete_customer = $this->db->delete('customer', 'id = ?', array($id_customer));
+        $fields = array('deleted');
+        $values = array(1);
+
+        // $delete_customer = $this->db->delete('customer', 'id = ?', array($id_customer));
+        $delete_customer = $this->db->update('customer', $fields, $values, 'deleted = 0 AND id = '.$id_customer);
 
         if($delete_customer) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
@@ -60,7 +64,7 @@ class Customer extends Model {
 
         $src = '%'.trim($search).'%';
 
-        $list_customers = $this->db->selectColumns(array('id', 'name'), 'customer', ' name LIKE ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src));
+        $list_customers = $this->db->selectColumns(array('id', 'name'), 'customer', ' name LIKE ? AND deleted = ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src, 0));
 
         if($list_customers) {
             return array('status'=> true, 'data'=> $list_customers);
@@ -74,7 +78,7 @@ class Customer extends Model {
 
         if(trim($search) !== '' && strlen(trim($search)) >= 3) {
             $src = '%'.trim($search).'%';
-            $list_brands = $this->db->selectColumns(array('id', 'name'), 'customer', ' name LIKE ? ORDER BY id ASC LIMIT 0, 20', array($src));
+            $list_brands = $this->db->selectColumns(array('id', 'name'), 'customer', ' name LIKE ? AND deleted = ? ORDER BY id ASC LIMIT 0, 20', array($src, 0));
         }
 
         if($list_brands) {
@@ -99,9 +103,9 @@ class Customer extends Model {
     public function allRows(string $search) {
         $src = '%'.trim($search).'%';
 
-        $query = 'SELECT count(*) AS len FROM customer  WHERE name LIKE ?';
+        $query = 'SELECT count(*) AS len FROM customer WHERE name LIKE ? AND deleted = ?';
 
-        $res = $this->db->rawQueryType('select', $query, array($src));
+        $res = $this->db->rawQueryType('select', $query, array($src, 0));
 
         return $res[0]['len'];
     }

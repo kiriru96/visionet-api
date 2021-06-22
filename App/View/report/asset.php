@@ -163,11 +163,15 @@
             margin-left: auto;
             margin-right: auto;
         }
+        .report-title {
+            padding: 20px;
+            text-align: center;
+        }
         </style>
     </head>
     <body id="content">
         <img src="../public/image/visionet.jpg"/>
-        
+        <div class="report-title"><h4><?= $title ?></h4></div>
         <table class="center">
             <thead>
                 <tr>

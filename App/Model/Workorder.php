@@ -39,7 +39,10 @@ class Workorder extends Model {
     }
 
     public function deleteWork(int $id_work) {
-        $work_delete = $this->db->delete('work_order', 'id = ?', array($id_work));
+        $fields = array('deleted');
+        $values = array(1);
+
+        $work_delete = $this->db->update('work_order', $fields, $values, 'id = '.$id_work);
 
         if($work_delete > 0) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus.');
@@ -98,10 +101,10 @@ class Workorder extends Model {
                 INNER JOIN device_name AS dn ON ass.device_name = dn.id
                 INNER JOIN location AS loc ON wo.location = loc.id
                 INNER JOIN customer AS cus ON wo.customer = cus.id
-                WHERE cus.name LIKE ? OR loc.name LIKE ?
+                WHERE (cus.name LIKE ? OR loc.name LIKE ?) AND wo.deleted = ?
                 ORDER BY wo.id DESC LIMIT '.$index.', '.$limit;
 
-        $list_works = $this->db->rawQueryType('select', $query, array($src, $src));
+        $list_works = $this->db->rawQueryType('select', $query, array($src, $src, 0));
 
         if($list_works) {
             return array('status'=> true, 'data'=> $list_works);
@@ -234,9 +237,9 @@ class Workorder extends Model {
             FROM work_order AS wo 
             INNER JOIN location AS loc ON wo.location = loc.id 
             INNER JOIN customer AS cus ON wo.customer = cus.id 
-            WHERE cus.name LIKE ? OR loc.name LIKE ?';
+            WHERE (cus.name LIKE ? OR loc.name LIKE ?) AND wo.deleted = ?';
 
-        $res = $this->db->rawQueryType('select', $query, array($src, $src));
+        $res = $this->db->rawQueryType('select', $query, array($src, $src, 0));
 
         return $res[0]['len'];
     }

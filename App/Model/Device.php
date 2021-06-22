@@ -33,7 +33,11 @@ class Device extends Model {
     }
 
     public function deleteRecord(int $id_device) {
-        $delete_device = $this->db->delete('device_name', 'id = ?', array($id_device));
+        $fields = array('deleted');
+        $values = array(1);
+
+        // $delete_device = $this->db->delete('device_name', 'id = ?', array($id_device));
+        $delete_device = $this->db->update('device_name', $fields, $values, 'deleted = 0 AND id = '.$id_device);
 
         if($delete_device) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
@@ -60,7 +64,7 @@ class Device extends Model {
 
         $src = '%'.trim($search).'%';
 
-        $list_devices = $this->db->selectColumns(array('id', 'name'), 'device_name', ' name LIKE ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src));
+        $list_devices = $this->db->selectColumns(array('id', 'name'), 'device_name', ' name LIKE ? AND deleted = ? ORDER BY '.$orderby.' DESC LIMIT '.$index.','.$limit, array($src, 0));
 
         if($list_devices) {
             return array('status'=> true, 'data'=> $list_devices);
@@ -74,7 +78,7 @@ class Device extends Model {
         
         if(trim($search) !== '' && strlen(trim($search)) >= 3) {
             $src = '%'.trim($search).'%';
-            $list_brands = $this->db->selectColumns(array('id', 'name'), 'device_name', ' name LIKE ? ORDER BY id ASC LIMIT 0, 20', array($src));
+            $list_brands = $this->db->selectColumns(array('id', 'name'), 'device_name', ' name LIKE ? AND deleted = ? ORDER BY id ASC LIMIT 0, 20', array($src, 0));
         }
 
         if($list_brands) {
@@ -99,9 +103,9 @@ class Device extends Model {
     public function allRows(string $search) {
         $src = '%'.trim($search).'%';
 
-        $query = 'SELECT count(*) AS len FROM device_name  WHERE name LIKE ?';
+        $query = 'SELECT count(*) AS len FROM device_name WHERE name LIKE ? AND deleted = ?';
 
-        $res = $this->db->rawQueryType('select', $query, array($src));
+        $res = $this->db->rawQueryType('select', $query, array($src, 0));
 
         return $res[0]['len'];
     }

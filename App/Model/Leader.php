@@ -60,7 +60,7 @@ class Leader extends Model {
     }
 
     private function checkAccountLeaderExists($username) {
-        $leaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'leader', 'username = ?', array($username));
+        $leaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'leader', 'username = ? AND deleted = ?', array($username, 0));
 
         if($leaders) {
             return $leaders[0];
@@ -102,7 +102,11 @@ class Leader extends Model {
     }
 
     public function deleteRecord(int $id_leader) {
-        $leader_delete = $this->db->delete('leader', 'id = ?', array($id_leader));
+        $fields = array('deleted');
+        $values = array(1);
+
+        // $leader_delete = $this->db->delete('leader', 'id = ?', array($id_leader));
+        $leader_delete = $this->db->update('leader', $fields, $values, 'deleted = 0 AND id = '.$id_leader);
 
         if($leader_delete) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
@@ -125,10 +129,10 @@ class Leader extends Model {
         leader.location
         FROM leader
         INNER JOIN `location` ON leader.location = `location`.id
-        WHERE leader.first_name LIKE ? OR leader.last_name LIKE ? OR leader.username LIKE ?
+        WHERE (leader.first_name LIKE ? OR leader.last_name LIKE ? OR leader.username LIKE ?) AND leader.deleted = ?
         ORDER BY '.$orderby.' DESC LIMIT '.$index.', '.$limit;
 
-        $list_leaders = $this->db->rawQueryType('select', $query_leaders, array($src, $src, $src));
+        $list_leaders = $this->db->rawQueryType('select', $query_leaders, array($src, $src, $src, 0));
 
         if($list_leaders) {
             return array('status'=> true, 'data'=> $list_leaders);
@@ -164,9 +168,9 @@ class Leader extends Model {
         $query = 'SELECT count(*) AS len 
         FROM leader
         INNER JOIN `location` ON leader.location = `location`.id
-        WHERE leader.first_name LIKE ? OR leader.last_name LIKE ? OR leader.username LIKE ?';
+        WHERE (leader.first_name LIKE ? OR leader.last_name LIKE ? OR leader.username LIKE ?) AND leader.deleted = ?';
 
-        $res = $this->db->rawQueryType('select', $query, array($src, $src, $src));
+        $res = $this->db->rawQueryType('select', $query, array($src, $src, $src, 0));
 
         return $res[0]['len'];
     }

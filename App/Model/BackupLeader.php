@@ -27,24 +27,24 @@ class Backupleader extends Model {
         }
     }
 
-    public function changeUsername(int $id, string $username) {
-        $check_username = $this->checkUsernameExists($username);
+    // public function changeUsername(int $id, string $username) {
+    //     $check_username = $this->checkUsernameExists($username);
 
-        if($check_username) {
-            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
-        } else {
-            $fields = array('username');
-            $values = array($username);
+    //     if($check_username) {
+    //         return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+    //     } else {
+    //         $fields = array('username');
+    //         $values = array($username);
 
-            $result = $this->db->update('backupleader', $fields, $values, 'id = '.$id_admin);
+    //         $result = $this->db->update('backupleader', $fields, $values, 'id = '.$id_admin);
 
-            if($result > 0) {
-                return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'username'=> $username));
-            } else {
-                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
-            }
-        }
-    }
+    //         if($result > 0) {
+    //             return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'username'=> $username));
+    //         } else {
+    //             return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
+    //         }
+    //     }
+    // }
 
     public function changePassword(int $id, string $password) {
         $fields = array('password');
@@ -60,7 +60,7 @@ class Backupleader extends Model {
     }
 
     private function checkAccountBackupLeaderExists($username) {
-        $backupleaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'backupleader', 'username = ?', array($username));
+        $backupleaders = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username', 'password', 'location'), 'backupleader', 'username = ? AND deleted = ?', array($username, 0));
 
         if($backupleaders) {
             return $backupleaders[0];
@@ -102,7 +102,11 @@ class Backupleader extends Model {
     }
 
     public function deleteRecord(int $id_backupleader) {
-        $backupleader_delete = $this->db->delete('backupleader', 'id = ?', array($id_backupleader));
+        $fields = array('deleted');
+        $values = array(1);
+
+        // $backupleader_delete = $this->db->delete('backupleader', 'id = ?', array($id_backupleader));
+        $backupleader_delete = $this->db->update('backupleader', $fields, $values, 'deleted = 0 AND id = '.$id_backupleader);
 
         if($backupleader_delete) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
@@ -117,18 +121,18 @@ class Backupleader extends Model {
         $src = '%'.trim($search).'%';
 
         $query_backupleaders = 'SELECT
-        backupleader.id,
-        backupleader.first_name,
-        backupleader.last_name,
-        backupleader.username,
-        `location`.`name` as locationname,
-        backupleader.location
-        FROM backupleader
-        INNER JOIN `location` ON backupleader.location = `location`.id
-        WHERE backupleader.first_name LIKE ? OR backupleader.last_name LIKE ? OR backupleader.username LIKE ?
-        ORDER BY '.$orderby.' DESC LIMIT '.$index.', '.$limit;
+            backupleader.id,
+            backupleader.first_name,
+            backupleader.last_name,
+            backupleader.username,
+            `location`.`name` as locationname,
+            backupleader.location
+            FROM backupleader
+            INNER JOIN `location` ON backupleader.location = `location`.id
+            WHERE (backupleader.first_name LIKE ? OR backupleader.last_name LIKE ? OR backupleader.username LIKE ?) AND backupleader.deleted = ?
+            ORDER BY '.$orderby.' DESC LIMIT '.$index.', '.$limit;
 
-        $list_backupleaders = $this->db->rawQueryType('select', $query_backupleaders, array($src, $src, $src));
+        $list_backupleaders = $this->db->rawQueryType('select', $query_backupleaders, array($src, $src, $src, 0));
 
         if($list_backupleaders) {
             return array('status'=> true, 'data'=> $list_backupleaders);
@@ -164,9 +168,9 @@ class Backupleader extends Model {
         $query = 'SELECT count(*) AS len 
         FROM backupleader
         INNER JOIN `location` ON backupleader.location = `location`.id
-        WHERE backupleader.first_name LIKE ? OR backupleader.last_name LIKE ? OR backupleader.username LIKE ?';
+        WHERE (backupleader.first_name LIKE ? OR backupleader.last_name LIKE ? OR backupleader.username LIKE ?) AND backupleader.deleted = ?';
 
-        $res = $this->db->rawQueryType('select', $query, array($src, $src, $src));
+        $res = $this->db->rawQueryType('select', $query, array($src, $src, $src, 0));
 
         return $res[0]['len'];
     }

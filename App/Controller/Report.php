@@ -11,10 +11,11 @@ class Report extends Controller {
             $enddate    = $this->req?->Get('enddate');
 
             $this->loadModel('asset', new Asset());
-            
+            $title = 'Stock In From '.$startdate.' To '.$enddate;
+
             $result = $this->asset->report_stock_in($startdate, $enddate);
 
-            return $this->res?->render('report/asset', array('table'=>$result['data']));
+            return $this->res?->render('report/asset', array('table'=>$result['data'], 'title'=> $title));
         }
     }
 

@@ -33,7 +33,11 @@ class Warehouse extends Model {
     }
 
     public function deleteRecord(int $id_warehouse) {
-        $delete_warehouse = $this->db->delete('warehoue', 'id = ?', array($id_warehouse));
+        $fields = array('deleted');
+        $values = array(1);
+
+        // $delete_warehouse = $this->db->delete('warehoue', 'id = ?', array($id_warehouse));
+        // $delete_warehouse = $this->db->update('warehouse', $fields, )
 
         if($delete_warehouse) {
             return array('status'=> true, 'msg'=> 'berhasil menghapus data.');
