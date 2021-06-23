@@ -76,7 +76,7 @@ class Device extends Model {
     public function lightListRecord(string $search) {
         $list_brands = null;
         
-        if(trim($search) !== '' && strlen(trim($search)) >= 3) {
+        if(trim($search) !== '' && strlen(trim($search)) >= 2) {
             $src = '%'.trim($search).'%';
             $list_brands = $this->db->selectColumns(array('id', 'name'), 'device_name', ' name LIKE ? AND deleted = ? ORDER BY id ASC LIMIT 0, 20', array($src, 0));
         }

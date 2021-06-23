@@ -1171,7 +1171,54 @@ class Api extends Controller {
                 $rows   = (int) $this->req?->Get('rows');
 
                 $result = $this->so->listRecord($id, $search, $page, $sortby == 'null' ? 'id' : $sortby, $sort == 'undefined' ? 'ASC' : $sort, $rows);
-                $len = $this->so->allRows($id);
+                $len = $this->so->allRows($id, 0);
+
+                if($result['status']) {
+                    return $this->res?->json(array('status'=> true, 'data'=> array('list'=>$result['data'], 'len'=>(int)$len)));
+                } else {
+                    return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+                }
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'Tidak terdapat Stock opname yang diproses.'));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function liststockopnamehistory() {
+        if($this->req?->getMethod() === 'GET' && $this->type === 0) {
+            $this->loadModel('so', new StockOpname());
+
+            $page   = (int) $this->req?->Get('page');
+            $search = $this->req?->Get('search');
+            $sortby = $this->req?->Get('sortby');
+            $sort   = $this->req?->Get('sort');
+            $rows   = (int) $this->req?->Get('rows');
+
+            $result = $this->so->listHistory($search, $page, $sortby, $sort, $rows);
+            $len = $this->so->allRowsHistory(1);
+            
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> array('list'=>$result['data'], 'len'=>(int)$len)));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function reportstockopname() {
+        if($this->req?->getMethod() === 'GET' && $this->type === 0) {
+            $this->loadModel('so', new StockOpname());
+
+            $date = $this->req?->Get('date');
+            $checkIdHistory = $this->so->getIdHistoryByDate($date);
+
+            if($checkIdHistory) {
+                $id = $checkIdHistory['id'];
+
+                $result = $this->so->reportTable($id, 0, 15);
+                $len = $this->so->allRows($id, 1);
 
                 if($result['status']) {
                     return $this->res?->json(array('status'=> true, 'data'=> array('list'=>$result['data'], 'len'=>(int)$len)));

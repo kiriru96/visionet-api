@@ -3,8 +3,26 @@ namespace App\Controller;
 use System\Controller as Controller;
 use App\Model\Asset as Asset;
 use App\Model\Workorder as Workorder;
+use App\Model\StockOpname as StockOpname;
 
 class Report extends Controller {
+
+    public function stockopname() {
+        if($this->req?->getMethod() === 'GET') {
+            $id = (int) $this->req?->Get('id');
+            $date = $this->req?->Get('date');
+
+            $title = 'Laporan Stock Opname '.$date;
+
+            $this->loadModel('so', new StockOpname());
+
+            $result = $this->so->reportTable($id);
+
+            if($result['status']) {
+                return $this->res?->render('report/stockopname', array('table'=> $result['data'], 'title'=> $title));
+            }
+        }
+    }
     public function stockin() {
         if($this->req?->getMethod() === 'GET') {
             $startdate  = $this->req?->Get('startdate');
@@ -15,7 +33,9 @@ class Report extends Controller {
 
             $result = $this->asset->report_stock_in($startdate, $enddate);
 
-            return $this->res?->render('report/asset', array('table'=>$result['data'], 'title'=> $title));
+            if($result) {
+                return $this->res?->render('report/asset', array('table'=>$result['data'], 'title'=> $title));
+            }
         }
     }
 
