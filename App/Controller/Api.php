@@ -18,6 +18,7 @@ use App\Model\Workorder as Workorder;
 use App\Model\Condition as Condition;
 use App\Model\StockIn as StockIn;
 use App\Model\StockOut as StockOut;
+use App\Model\StockOpname as StockOpname;
 
 class Api extends Controller {
     private const KEY = 'qwerty123456789';
@@ -1053,6 +1054,132 @@ class Api extends Controller {
                 return $this->res?->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function checkstockopname() {
+        if($this->req?->getMethod() === 'GET' && $this->type === 0)  {
+            $this->loadModel('so', new StockOpname());
+
+            $result = $this->so->checkStockOpnameHistory();
+
+            if($result) {
+                $id     = $result['id'];
+                $date   = $result['date'];
+
+                return $this->res?->json(array('status'=> true, 'data'=> array('id'=>(int)$id, 'date'=> $date)));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'tidak ada stock opname yang diproses.'));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function createstockopname() {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0)  {
+            $this->loadModel('so', new StockOpname());
+
+            $result = $this->so->createStockOpname();
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> array('id'=>$result['id'], 'date'=> $result['date'])));
+            } else {
+                return $this->res?->json(array('status'=> true, 'msg'=> $result['msg']));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function insertstockopname() {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0)  {
+            $this->loadModel('so', new StockOpname());
+            
+            $id_asset           = (int)$this->req?->Post('idasset');
+            $stock_available    = (int)$this->req?->Post('stock_available');
+            $stock_actual       = (int)$this->req?->Post('stock_actual');
+            $description        = $this->req?->Post('description');
+
+            $stock_diff         = $stock_actual - $stock_available;
+
+            $result = $this->so->insertStockOpnameList($id_asset, $stock_available, $stock_actual, $stock_diff, $description);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'msg'=> $result['msg']));
+            } else {
+                return $this->res?->json(array('status'=> true, 'msg'=> $result['msg']));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function deletestockopname() {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0)  {
+            $this->loadModel('so', new StockOpname());
+
+            $id_history = (int)$this->req?->Post('idhistory');
+            $id_asset   = (int)$this->req?->Post('idasset');
+
+            $result = $this->so->deleteStockOpnameList($id_history, $id_asset);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'msg'=> $result['msg']));
+            } else {
+                return $this->res?->json(array('status'=> true, 'msg'=> $result['msg']));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function submitstockopnamehistory() {
+        if($this->req?->getMethod() === 'POST' && $this->type === 0)  {
+            $this->loadModel('so', new StockOpname());
+
+            $checkso = $this->so->checkStockOpnameHistory();
+
+            if($checkso) {
+                $id = (int) $checkso['id'];
+
+                $result = $this->so->submitStockOpnameHistory($id);
+
+                if($result['status']) {
+                    return $this->res?->json(array('status'=> true, 'msg'=> $result['msg']));
+                } else {
+                    return $this->res?->json(array('status'=> true, 'msg'=> $result['msg']));
+                }
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'Tidak terdapat Stock opname yang diproses.'));    
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+    }
+
+    public function liststockopname() {
+        if($this->req?->getMethod() === 'GET' && $this->type === 0) {
+            $this->loadModel('so', new StockOpname());
+
+            $checkso = $this->so->checkStockOpnameHistory();
+
+            if($checkso) {
+                $id = (int) $checkso['id'];
+
+                $page   = (int) $this->req?->Get('page');
+                $search = $this->req?->Get('search');
+                $sortby = $this->req?->Get('sortby');
+                $sort   = $this->req?->Get('sort');
+                $rows   = (int) $this->req?->Get('rows');
+
+                $result = $this->so->listRecord($id, $search, $page, $sortby == 'null' ? 'id' : $sortby, $sort == 'undefined' ? 'ASC' : $sort, $rows);
+                $len = $this->so->allRows($id);
+
+                if($result['status']) {
+                    return $this->res?->json(array('status'=> true, 'data'=> array('list'=>$result['data'], 'len'=>(int)$len)));
+                } else {
+                    return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+                }
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'Tidak terdapat Stock opname yang diproses.'));
             }
         }
         return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
