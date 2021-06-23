@@ -175,14 +175,15 @@ class Asset extends Model {
             ass.stock_available,
             dn.name AS devicename,
             db.name AS brandname,
-            ass.serial_number
+            ass.serial_number,
+            ass.model
             FROM assets AS ass
             INNER JOIN device_name AS dn ON dn.id = ass.device_name
             INNER JOIN device_brand AS db ON db.id = ass.device_brand
-            WHERE ass.serial_number LIKE ? OR dn.name LIKE ?
-            ORDER BY ass.id ASC LIMIT 0, 20';
+            WHERE (ass.serial_number LIKE ? OR dn.name LIKE ? OR ass.model LIKE ?) AND ass.deleted = ?
+            ORDER BY ass.id ASC LIMIT 0, 100';
 
-        $result = $this->db->rawQueryType('select', $query, array($src, $src));
+        $result = $this->db->rawQueryType('select', $query, array($src, $src, $src, 0));
 
         if($result) {
             return array('status'=> true, 'data'=> $result);
