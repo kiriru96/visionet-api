@@ -156,11 +156,8 @@ class Workorder extends Model {
                 INNER JOIN device_name as dn ON ass.device_name = dn.id
                 INNER JOIN device_brand as db ON ass.device_brand = db.id
                 LEFT JOIN work_order_engginer_confirm AS woec ON woec.work_order = wo.id
-                WHERE DATE(wo.datecreated) = ? AND wo.location = ? AND woec.work_order IS NULL
+                WHERE DATE(wo.datecreated) = ? AND wo.location = ? AND woec.work_order IS NULL AND wo.deleted = 0
                 ORDER BY wo.datecreated DESC LIMIT '.$index.',20';
-
-        echo $query;
-        die();
 
         $list_works = $this->db->rawQueryType('select', $query, array($date, $location));
 
