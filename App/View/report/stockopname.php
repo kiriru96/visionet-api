@@ -197,7 +197,7 @@
                         Stok gudang
                     </th>
                     <th class="text-left">
-                        Selisih gudang
+                        Selisih Stok
                     </th>
                     <th class="text-left">
                         Keterangan
@@ -217,10 +217,10 @@
                         <?= $item['brandname'] ?>
                     </td>
                     <td>
-                        <?= $item['model'] ?>
+                        <?= (string)$item['model'] ?>
                     </td>
                     <td>
-                        <?= $item['serial_number'] ?>
+                        <?= (string)$item['serial_number'] ?>
                     </td>
                     <td>
                         <?= $item['current_stock_available'] ?>

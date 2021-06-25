@@ -6,6 +6,22 @@ use App\Model\Workorder as Workorder;
 use App\Model\StockOpname as StockOpname;
 
 class Report extends Controller {
+    public function stockopnamesheet() {
+        if($this->req?->getMethod() === 'GET') {
+            $id = (int) $this->req?->Get('id');
+            $date = $this->req?->Get('date');
+
+            $title = 'Laporan Stock Opname '.$date;
+
+            $this->loadModel('so', new StockOpname());
+
+            $result = $this->so->reportTable($id);
+
+            if($result['status']) {
+                return $this->res?->rendertosheet('report/stockopname', array('table'=> $result['data'], 'title'=> $title), $date);
+            }
+        }
+    }
 
     public function stockopname() {
         if($this->req?->getMethod() === 'GET') {

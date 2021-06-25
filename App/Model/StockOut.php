@@ -108,8 +108,8 @@ class StockOut extends Model {
             assets AS ass, 
             stock_out_history AS soh
             SET
-                ass.stock_out = ass.stock_out + soh.count_input
-                ass.stock_available = ass.stock_available - soh.count_input
+                ass.stock_out = ass.stock_out + soh.count_input,
+                ass.stock_available = ass.stock_available - soh.count_input,
                 soh.status = 1
             WHERE
                 ass.id = soh.asset_id AND soh.status = 0 AND soh.id_account = ?';
