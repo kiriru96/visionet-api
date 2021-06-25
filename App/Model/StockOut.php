@@ -91,10 +91,10 @@ class StockOut extends Model {
                 LEFT JOIN admin AS adm ON soh.id_account = adm.id AND soh.type_account = 0
                 INNER JOIN device_name AS dn ON ass.device_name = dn.id
                 INNER JOIN device_brand AS db ON ass.device_brand = db.id
-                WHERE soh.id_account = ?
+                WHERE soh.id_account = ? AND soh.status = ?
                 ORDER BY soh.datecreated ASC';
 
-        $list_stock_in_history = $this->db->rawQueryType('select', $query, array($id));
+        $list_stock_in_history = $this->db->rawQueryType('select', $query, array($id, 0));
 
         if($list_stock_in_history) {
             return array('status'=> true, 'data'=> $list_stock_in_history);

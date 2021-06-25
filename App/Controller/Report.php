@@ -49,7 +49,7 @@ class Report extends Controller {
 
             $result = $this->asset->report_stock_in($startdate, $enddate);
 
-            if($result) {
+            if($result['status']) {
                 return $this->res?->render('report/asset', array('table'=>$result['data'], 'title'=> $title));
             }
         }
@@ -61,10 +61,13 @@ class Report extends Controller {
             $enddate    = $this->req?->Get('enddate');
 
             $this->loadModel('asset', new Asset());
+            $title = 'Stock In From '.$startdate.' To '.$enddate;
             
             $result = $this->asset->report_stock_out($startdate, $enddate);
 
-            return $this->res?->render('report/asset', array('table'=>$result['data']));
+            if($result['status']) {
+                return $this->res?->render('report/asset', array('table'=>$result['data'], 'title'=> $title));
+            }
         }
     }
 
@@ -96,7 +99,7 @@ class Report extends Controller {
 
             $table = $this->asset->reportTable();
 
-            if($table['result']) {
+            if($table['result']) {  
                 return $this->res?->render('report/asset', array('table'=> $table['table']));
             } else {
                 return $this->res?->render('report/notfound', array('msg'=> $table['msg']));
