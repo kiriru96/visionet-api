@@ -178,10 +178,13 @@ class Workorder extends Model {
                 loc.name AS locationname,
                 cus.name AS customername,
                 woec.pic_list,
-                woec.desc_list
+                woec.desc_list,
+                engg.id,
+                CONCAT(engg.first_name, " ", engg.last_name) AS engginername
                 FROM work_order AS wo
                 LEFT JOIN work_order_engginer_confirm AS woec ON wo.id = woec.work_order
                 INNER JOIN customer as cus ON wo.customer = cus.id
+                LEFT JOIN engginer as engg ON wo.engginer = engg.id
                 INNER JOIN location as loc ON wo.location = loc.id
                 INNER JOIN assets as ass ON wo.asset = ass.id
                 INNER JOIN device_name as dn ON ass.device_name = dn.id
@@ -190,7 +193,7 @@ class Workorder extends Model {
 
         $wo = $this->db->rawQueryType('select', $query, array($id));
         
-        if($wo[0]) {
+        if($wo) {
             return array('status'=> true, 'data'=> $wo[0]);
         } else {
             return array('status'=> false, 'msg'=> 'tidak menemukan data.');
