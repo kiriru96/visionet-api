@@ -104,7 +104,7 @@ class Woec extends Model {
         if($list_progress) {
             return array('status'=> true, 'data'=> $list_progress);
         } else {
-            return array('status'=> false, 'msg'=> 'tidak ada assets');
+            return array('status'=> false, 'msg'=> 'tidak ada data.');
         }
     }
 
@@ -131,7 +131,7 @@ class Woec extends Model {
         if($list_progress) {
             return array('status'=> true, 'data'=> $list_progress);
         } else {
-            return array('status'=> false, 'msg'=> 'tidak ada assets');
+            return array('status'=> false, 'msg'=> 'tidak ada data');
         }
     }
 

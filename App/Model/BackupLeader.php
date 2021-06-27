@@ -17,34 +17,34 @@ class Backupleader extends Model {
         return array('status'=> false, 'msg'=> 'Username atau password salah.');
     }
 
-    public function profile($id) {
-        $result = $this->db->selectColumns(array('id', 'fullname', 'username'), 'backupleader', 'id = ?', array($id));
+    public function profile($type, $id) {
+        $result = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username'), 'backupleader', 'id = ?', array($id));
 
         if($result) {
-            return array('status'=> true, 'data'=> array('id'=> $result['id'], 'name'=> $result['first_name'].' '.$result['last_name'], 'username'=> $result['username']));
+            return array('status'=> true, 'data'=> array('type'=> $type, 'id'=> $result[0]['id'], 'name'=> $result[0]['first_name'].' '.$result[0]['last_name'], 'username'=> $result[0]['username']));
         } else {
             return array('status'=> false, 'msg'=> 'cannot find profile');
         }
     }
 
-    // public function changeUsername(int $id, string $username) {
-    //     $check_username = $this->checkUsernameExists($username);
+    public function changeUsername(int $id, string $username) {
+        $check_username = $this->checkAccountBackupLeaderExists($username);
 
-    //     if($check_username) {
-    //         return array('status'=> false, 'msg'=> 'username sudah terpakai.');
-    //     } else {
-    //         $fields = array('username');
-    //         $values = array($username);
+        if($check_username) {
+            return array('status'=> false, 'msg'=> 'username sudah terpakai.');
+        } else {
+            $fields = array('username');
+            $values = array($username);
 
-    //         $result = $this->db->update('backupleader', $fields, $values, 'id = '.$id_admin);
+            $result = $this->db->update('backupleader', $fields, $values, 'id = '.$id_admin);
 
-    //         if($result > 0) {
-    //             return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'username'=> $username));
-    //         } else {
-    //             return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
-    //         }
-    //     }
-    // }
+            if($result > 0) {
+                return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'username'=> $username));
+            } else {
+                return array('status'=> false, 'msg'=> 'gagal memperbaharui.');
+            }
+        }
+    }
 
     public function changePassword(int $id, string $password) {
         $fields = array('password');
@@ -56,6 +56,19 @@ class Backupleader extends Model {
             return array('status'=> true, 'msg'=> 'berhasil memperbaharui password.');
         } else {
             return array('status'=> false, 'msg'=> 'gagal memperbaharui password.');
+        }
+    }
+
+    public function changeName(int $id, string $firstname, string $lastname) {
+        $fields = array('first_name', 'last_name');
+        $values = array($firstname, $lastname);
+
+        $result = $this->db->update('backupleader', $fields, $values, 'id = '.$id);
+
+        if($result) {
+            return array('status'=> true, 'data'=> array('id'=> $id, 'name'=> $firstname.' '.$lastname));
+        } else {
+            return array('status'=> false, 'msg'=> 'Gagal memperbaharui nama');
         }
     }
 

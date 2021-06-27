@@ -17,18 +17,18 @@ class Leader extends Model {
         return array('status'=> false, 'msg'=> 'Username atau password salah.');
     }
 
-    public function profile($id) {
+    public function profile($type, $id) {
         $result = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username'), 'leader', 'id = ?', array($id));
 
         if($result) {
-            return array('status'=> true, 'data'=> array('id'=> $result['id'], 'name'=> $result['first_name'].' '.$result['last_name'], 'username'=> $result['username']));
+            return array('status'=> true, 'data'=> array('type'=> $type, 'id'=> $result[0]['id'], 'name'=> $result[0]['first_name'].' '.$result[0]['last_name'], 'username'=> $result[0]['username']));
         } else {
             return array('status'=> false, 'msg'=> 'cannot find profile');
         }
     }
 
     public function changeUsername(int $id, string $username) {
-        $check_username = $this->checkUsernameExists($username);
+        $check_username = $this->checkAccountLeaderExists($username);
 
         if($check_username) {
             return array('status'=> false, 'msg'=> 'username sudah terpakai.');
@@ -56,6 +56,19 @@ class Leader extends Model {
             return array('status'=> true, 'msg'=> 'berhasil memperbaharui password.');
         } else {
             return array('status'=> false, 'msg'=> 'gagal memperbaharui password.');
+        }
+    }
+
+    public function changeName(int $id, string $firstname, string $lastname) {
+        $fields = array('first_name', 'last_name');
+        $values = array($firstname, $lastname);
+
+        $result = $this->db->update('leader', $fields, $values, 'id = '.$id);
+
+        if($result) {
+            return array('status'=> true, 'data'=> array('id'=> $id, 'name'=> $firstname.' '.$lastname));
+        } else {
+            return array('status'=> false, 'msg'=> 'Gagal memperbaharui nama');
         }
     }
 

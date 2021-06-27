@@ -61,7 +61,7 @@ class Report extends Controller {
             $enddate    = $this->req?->Get('enddate');
 
             $this->loadModel('asset', new Asset());
-            $title = 'Stock In From '.$startdate.' To '.$enddate;
+            $title = 'Stock Out From '.$startdate.' To '.$enddate;
             
             $result = $this->asset->report_stock_out($startdate, $enddate);
 

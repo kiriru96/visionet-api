@@ -731,9 +731,9 @@ class Api extends Controller {
             $result = $this->woec->confirmWoec($woecid);
 
             if($result['status']) {
-                return array('status'=> true, 'msg'=> $result['msg']);
+                return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));
             } else {
-                return array('status'=> false, 'msg'=> $result['msg']);
+                return $this->res->json(array('status'=> false, 'msg'=> $result['msg']));
             }
         }
 
@@ -1233,6 +1233,129 @@ class Api extends Controller {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'Tidak terdapat Stock opname yang diproses.'));
             }
         }
-        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function profile() {
+        if($this->req?->getMethod() === 'GET') {
+
+            if($this->type === 0) {
+                $this->loadModel('profile', new Admin());
+            } else if($this->type === 1) {
+                $this->loadModel('profile', new Leader());
+            } else if($this->type === 2) {
+                $this->loadModel('profile', new Backupleader());
+            } else if($this->type === 3) {
+                $this->loadModel('profile', new Engginer());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $result = $this->profile->profile($this->type, $this->id);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> $result['data']));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function changenameprofile() {
+        if($this->req?->getMethod() === 'POST') {
+            if($this->type === 0) {
+                $this->loadModel('profile', new Admin());
+            } else if($this->type === 1) {
+                $this->loadModel('profile', new Leader());
+            } else if($this->type === 2) {
+                $this->loadModel('profile', new Backupleader());
+            } else if($this->type === 3) {
+                $this->loadModel('profile', new Engginer());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $result = null;
+
+            if($this->type === 0) {
+                $fullname = $this->req?->Post('fullname');
+
+                $result = $this->profile->changeName($this->id, $fullname);
+            } else {
+                $firstname = $this->req?->Post('firstname');
+                $lastname = $this->req?->Post('lastname');
+
+                $result = $this->profile->changeName($this->id, $firstname, $lastname);
+            }
+
+            if($result) {
+                if($result['status']) {
+                    return $this->res?->json(array('status'=> true));
+                } else {
+                    return $this->res?->json(array('status'=> false));
+                }
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'terjadi kesalahan.'));
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
+    public function changepasswordaccount() {
+        if($this->req?->getMethod() === 'POST') {
+            if($this->type === 0) {
+                $this->loadModel('profile', new Admin());
+            } else if($this->type === 1) {
+                $this->loadModel('profile', new Leader());
+            } else if($this->type === 2) {
+                $this->loadModel('profile', new Backupleader());
+            } else if($this->type === 3) {
+                $this->loadModel('profile', new Engginer());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $password = $this->req?->Post('password');
+
+            $result = $this->profile->changePassword($this->id, $password);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true));
+            } else {
+                return $this->res?->json(array('status'=> false));
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+    
+    public function changeusernameaccount() {
+        if($this->req?->getMethod() === 'POST') {
+            if($this->type === 0) {
+                $this->loadModel('profile', new Admin());
+            } else if($this->type === 1) {
+                $this->loadModel('profile', new Leader());
+            } else if($this->type === 2) {
+                $this->loadModel('profile', new Backupleader());
+            } else if($this->type === 3) {
+                $this->loadModel('profile', new Engginer());
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+            }
+
+            $username = $this->req?->Post('username');
+
+            $result = $this->profile->changeUsername($this->id, $username);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true));
+            } else {
+                return $this->res?->json(array('status'=> false));
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
     }
 }

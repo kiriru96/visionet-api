@@ -171,7 +171,7 @@ class Workorder extends Model {
     public function detailWO(int $id) {
         $query = 'SELECT
                 woec.id AS engginer_submit_id,
-                wo.id,
+                wo.id AS work_order_id,
                 ass.id AS asset_id,
                 dn.name AS devicename,
                 db.name AS brandname,
@@ -179,8 +179,9 @@ class Workorder extends Model {
                 cus.name AS customername,
                 woec.pic_list,
                 woec.desc_list,
-                engg.id,
-                CONCAT(engg.first_name, " ", engg.last_name) AS engginername
+                engg.id AS engginer_id,
+                CONCAT(engg.first_name, " ", engg.last_name) AS engginername,
+                woec.status AS work_order_submit_confirm_status
                 FROM work_order AS wo
                 LEFT JOIN work_order_engginer_confirm AS woec ON wo.id = woec.work_order
                 INNER JOIN customer as cus ON wo.customer = cus.id

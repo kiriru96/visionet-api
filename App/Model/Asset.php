@@ -143,14 +143,14 @@ class Asset extends Model {
 
     public function listAssetsByBrand(int $id_brand, int $limit, int $index_start) {
         $query_list_assets = 'SELECT 
-        device_name.name as devicename,
-        device_brand.name as brandname,
+        device_name.name AS devicename,
+        device_brand.name AS brandname,
         assets.serial_number,
         assets.condition,
         assets.description,
         assets.date_in,
         assets.date_out,
-        warehouse.name as warehousename
+        warehouse.name AS warehousename
         FROM assets 
         INNER JOIN device_name ON  assets.device_name = device_name.id 
         INNER JOIN device_brand ON assets.device_brand = device_brand.id 

@@ -17,11 +17,11 @@ class Admin extends Model {
         return array('status'=> false, 'msg'=> 'username atau password salah.');
     }
 
-    public function profile($id) {
+    public function profile($type, $id) {
         $result = $this->db->selectColumns(array('id', 'fullname', 'username'), 'admin', 'id = ?', array($id));
 
         if($result) {
-            return array('status'=> true, 'data'=> array('id'=> $result['id'], 'name'=> $result['fullname'], 'username'=> $result['username']));
+            return array('status'=> true, 'data'=> array('type'=> $type, 'id'=> $result[0]['id'], 'name'=> $result[0]['fullname'], 'username'=> $result[0]['username']));
         } else {
             return array('status'=> false, 'msg'=> 'cannot find profile');
         }
@@ -56,6 +56,19 @@ class Admin extends Model {
             return array('status'=> true, 'msg'=> 'berhasil memperbaharui password.');
         } else {
             return array('status'=> false, 'msg'=> 'gagal memperbaharui password.');
+        }
+    }
+
+    public function changeName(int $id, string $fullname) {
+        $fields = array('fullname');
+        $values = array($fullname);
+
+        $result = $this->db->update('admin', $fields, $values, 'id = '.$id);
+
+        if($result) {
+            return array('status'=> true, 'data'=> array('id'=> $id, 'name'=> $fullname));
+        } else {
+            return array('status'=> false, 'msg'=> 'Gagal memperbaharui nama');
         }
     }
 
