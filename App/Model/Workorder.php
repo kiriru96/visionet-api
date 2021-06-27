@@ -181,7 +181,8 @@ class Workorder extends Model {
                 woec.desc_list,
                 engg.id AS engginer_id,
                 CONCAT(engg.first_name, " ", engg.last_name) AS engginername,
-                woec.status AS work_order_submit_confirm_status
+                woec.status AS work_order_submit_confirm_status,
+                ass.serial_number
                 FROM work_order AS wo
                 LEFT JOIN work_order_engginer_confirm AS woec ON wo.id = woec.work_order
                 INNER JOIN customer as cus ON wo.customer = cus.id
