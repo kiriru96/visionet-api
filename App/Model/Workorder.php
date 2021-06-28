@@ -52,8 +52,8 @@ class Workorder extends Model {
     }
 
     public function signEngginer(int $id_work_order, int $id_engginer) {
-        $fields = array('engginer');
-        $values = array($id_engginer);
+        $fields = array('engginer', 'status');
+        $values = array($id_engginer, 1);
 
         $update_engginer_wo = $this->db->update('work_order', $fields, $values, 'id = '.$id_work_order);
 
@@ -94,13 +94,15 @@ class Workorder extends Model {
                 wo.location,
                 wo.customer,
                 loc.name AS worklocation,
-                cus.name AS customername
+                cus.name AS customername,
+                wos.name AS statustitle 
                 FROM work_order AS wo
                 INNER JOIN assets AS ass ON wo.asset = ass.id
                 INNER JOIN device_brand AS db ON ass.device_brand = db.id
                 INNER JOIN device_name AS dn ON ass.device_name = dn.id
                 INNER JOIN location AS loc ON wo.location = loc.id
                 INNER JOIN customer AS cus ON wo.customer = cus.id
+                INNER JOIN wo_status AS wos ON wos.id = wo.status
                 WHERE (cus.name LIKE ? OR loc.name LIKE ?) AND wo.deleted = ?
                 ORDER BY wo.id DESC LIMIT '.$index.', '.$limit;
 

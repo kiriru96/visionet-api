@@ -36,7 +36,7 @@ class Admin extends Model {
             $fields = array('username');
             $values = array($username);
 
-            $result = $this->db->update('admin', $fields, $values, 'id = '.$id_admin);
+            $result = $this->db->update('admin', $fields, $values, 'id = '.$id);
 
             if($result > 0) {
                 return array('status'=> true, 'msg'=> 'berhasil memperbaharui data.', 'data'=> array('id'=> $id_admin, 'fullname'=> $fullname, 'username'=> $username));

@@ -21,7 +21,7 @@ class Backupleader extends Model {
         $result = $this->db->selectColumns(array('id', 'first_name', 'last_name', 'username'), 'backupleader', 'id = ?', array($id));
 
         if($result) {
-            return array('status'=> true, 'data'=> array('type'=> $type, 'id'=> $result[0]['id'], 'name'=> $result[0]['first_name'].' '.$result[0]['last_name'], 'username'=> $result[0]['username']));
+            return array('status'=> true, 'data'=> array('type'=> $type, 'id'=> $result[0]['id'], 'firstname'=> $result[0]['first_name'], 'lastname'=> $result[0]['last_name'], 'name'=> $result[0]['first_name'].' '.$result[0]['last_name'], 'username'=> $result[0]['username']));
         } else {
             return array('status'=> false, 'msg'=> 'cannot find profile');
         }

@@ -69,10 +69,19 @@ class Woec extends Model {
     }
 
     public function confirmWoec(int $id) {
-        $fields = array('status');
-        $values = array(1);
+        // $fields = array('status');
+        // $values = array(1);
 
-        $result = $this->db->update('work_order_engginer_confirm', $fields, $values, 'id = '.$id);
+        // $result = $this->db->update('work_order_engginer_confirm', $fields, $values, 'id = '.$id);
+        $query = 'UPDATE 
+            work_order_engginer_confirm AS woec, 
+            work_order AS wo 
+            SET 
+            woec.status = ?,
+            wo.status = ?
+            WHERE woec.id = ? AND wo.id = woec.work_order';
+
+        $result = $this->db->rawQueryType('update', $query, array(1, 2, $id));
 
         if($result) {
             return array('status'=> true, 'msg'=> 'berhasil.');
