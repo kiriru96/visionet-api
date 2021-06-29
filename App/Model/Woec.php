@@ -81,7 +81,7 @@ class Woec extends Model {
             wo.status = ?
             WHERE woec.id = ? AND wo.id = woec.work_order';
 
-        $result = $this->db->rawQueryType('update', $query, array(1, 2, $id));
+        $result = $this->db->rawQueryType('update', $query, array(1, 1, $id));
 
         if($result) {
             return array('status'=> true, 'msg'=> 'berhasil.');

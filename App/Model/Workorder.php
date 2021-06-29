@@ -52,8 +52,8 @@ class Workorder extends Model {
     }
 
     public function signEngginer(int $id_work_order, int $id_engginer) {
-        $fields = array('engginer', 'status');
-        $values = array($id_engginer, 1);
+        $fields = array('engginer');
+        $values = array($id_engginer);
 
         $update_engginer_wo = $this->db->update('work_order', $fields, $values, 'id = '.$id_work_order);
 
