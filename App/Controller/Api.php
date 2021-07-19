@@ -87,12 +87,12 @@ class Api extends Controller {
     }
 
     public function test() {
-        $data = json_decode(file_get_contents('php://input'), true);
-        print_r($data);
-        var_dump($_FILES);
-        var_dump($_POST);
-        var_dump($_COOKIE);
-        var_dump($_SESSION);
+        // $data = json_decode(file_get_contents('php://input'), true);
+        // print_r($data);
+        // var_dump($_FILES);
+        // var_dump($_POST);
+        // var_dump($_COOKIE);
+        // var_dump($_SESSION);
     }
 
     public function index() {
