@@ -295,9 +295,9 @@ class Asset extends Model {
             SUM(stock_in) AS quantity_in,
             SUM(stock_out) AS quantity_out,
             SUM(stock_available) AS quantity_all
-            FROM assets';
+            FROM assets WHERE deleted = ?';
 
-        $result = $this->db->rawQueryType('select', $query, array());
+        $result = $this->db->rawQueryType('select', $query, array(0));
 
         if($result) {
             return array('status'=> true, 'data'=> $result[0]);

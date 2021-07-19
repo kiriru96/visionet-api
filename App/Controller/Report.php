@@ -77,10 +77,11 @@ class Report extends Controller {
             $enddate    = $this->req?->Get('enddate');
 
             $this->loadModel('wo', new Workorder());
+            $title = 'Work Order From '.$startdate.' To '.$enddate;
 
             $result = $this->wo->report($startdate, $enddate);
 
-            return $this->res?->render('report/workorder', array('table'=> $result['data']));
+            return $this->res?->render('report/workorder', array('table'=> $result['data'], 'title'=> $title));
         }
     }
 

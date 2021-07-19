@@ -1063,6 +1063,25 @@ class Api extends Controller {
         return $this->res?->json(array('status'=> false, 'msg'=> 'cannot reponse this request.'));
     }
 
+    public function reportworkorder() {
+        if($this->req?->getMethod() === 'GET') {
+            $startdate  = $this->req?->Get('startdate');
+            $enddate    = $this->req?->Get('enddate');
+
+            $this->loadModel('wo', new WorkOrder());
+
+            $result = $this->wo->report($startdate, $enddate);
+
+            if($result['status']) {
+                return $this->res?->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
+            } else {
+                return $this->res?->json(array('status'=> false, 'msg'=> $result['msg']));
+            }
+        }
+
+        return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
+    }
+
     public function checkstockopname() {
         if($this->req?->getMethod() === 'GET' && $this->type === 0)  {
             $this->loadModel('so', new StockOpname());

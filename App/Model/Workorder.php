@@ -210,10 +210,11 @@ class Workorder extends Model {
             cus.name AS customername,
             dn.name AS devicename,
             db.name AS brandname,
-            engginer.first_name AS firstname,
-            engginer.last_name AS lastname,
+            engg.first_name AS firstname,
+            engg.last_name AS lastname,
             ass.serial_number AS inventory_code,
             ass.model,
+            ws.name AS status_wo,
             wo.datecreated
             FROM work_order AS wo
             INNER JOIN assets AS ass ON ass.id = wo.asset
@@ -222,8 +223,9 @@ class Workorder extends Model {
             INNER JOIN engginer AS engg ON engg.id = wo.engginer
             INNER JOIN customer As cus ON cus.id = wo.customer
             INNER JOIN location AS loc ON loc.id = wo.location
+            INNER JOIN wo_status AS ws ON wo.status = ws.id
             WHERE status = ? AND DATE(wo.datecreated) BETWEEN ? AND ?
-            ORDER BY DATE wo.datecreated ASC';
+            ORDER BY wo.datecreated ASC';
 
         $result = $this->db->rawQueryType('select', $query, array(1, $datestart, $dateend));
 
