@@ -30,6 +30,25 @@ class Woec extends Model {
             return array('status'=> false, 'msg'=> 'terhadi kesalahan.');
         }
     }
+
+    public function editWorkOrderConfirm(int $wo, string $pics, string $descs, int $idsubmit) {
+        $check_woec = $this->checkWOECExists($wo);
+
+        if($check_woec) {
+            $fields = array('pic_list', 'desc_list', 'id_submit');
+            $values = array($pics, $descs, $idsubmit);
+
+            $update_woec = $this->db->update('work_order_engginer_confirm', $fields, $values, 'work_order = '.$wo);
+
+            if($update_woec > 0) {
+                return array('status'=> true, 'msg' => 'Berhasil memperbaharui.');
+            } else {
+                return array('status'=> false, 'msg'=> 'Gagal memperbaharui');
+            }
+        } else {
+            return array('status'=> false, 'msg'=> 'Tidak bisa melakukan update, data tidak ditemukan.');
+        }
+    }
     // update woec table
     public function updateWorkOrderConfirm(int $id, string $pics) {
         $fields = array('pic_list');

@@ -846,16 +846,19 @@ class Api extends Controller {
 
     public function updatewoec() {
         if($this->req?->getMethod() === 'POST' && $this->type === 3) {
-            $id_engginer = $this->req?->Post('id');
-            
-            $id_woec    = $this->req?->Post('woecid');
-            
-            $id_work_order  = $this->req?->Post('idwo');
+            $id_engginer    = (int) $this->id;
+            $id_work_order  = (int) $this->req?->Post('idwo');
+            $descs = $this->req?->Post('desc');
+            $desc_list = json_encode($descs);
+
+            $this->loadModel('woec', new Woec());
 
             $images_uploads = array();
-            $length_images  = count($_FILES['woimages']['name']);
+            $length_images  = count($_FILES['image']['name']);
 
-            $folder_wo_images = __DIR__.'/public/'.$id_work_order.date('Ymd');
+            $folder_images = $id_work_order.date('Ymdhis');
+
+            $folder_wo_images = __DIR__.'../../../public/uploads/'.$folder_images;
 
             if(!is_dir($folder_wo_images)) {
                 mkdir($folder_wo_images);
@@ -863,20 +866,28 @@ class Api extends Controller {
             
             if($length_images <= 6 && $length_images > 0) {
                 for($index = 0; $index < $length_images; $index++) {
-                    $uploadfiles = $_FILES['woimages']['tmp_name'][$index];
+                    $uploadfiles = $_FILES['image']['tmp_name'][$index];
 
                     $check_image = getimagesize($uploadfiles);
 
                     if($check_image) {
-                        $image_file_type = strtolower(pathinfo($_FILES['woimages']['name'][$index], PATHINFO_EXTENSION));
+                        $image_file_type = strtolower(pathinfo($_FILES['image']['name'][$index], PATHINFO_EXTENSION));
                         
-                        if(image_file_type === 'jpg' || $image_file_type === 'jpeg') {
+                        if($image_file_type === 'jpg' || $image_file_type === 'jpeg') {
                             $dest = $folder_wo_images.'/'.$index.'.'.$image_file_type;
+                            $img_dest = $folder_images.'/'.$index.'.'.$image_file_type;
                             if(move_uploaded_file($uploadfiles, $dest)) {
-                                array_push($images_uploads, $dest);
+                                array_push($images_uploads, $img_dest);
                             }
                         }
                     }
+                }
+                $result = $this->woec->editWorkOrderConfirm($id_work_order, json_encode($images_uploads), $desc_list, $id_engginer);
+
+                if($result['status']) {
+                    return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));
+                } else {
+                    return $this->res->json(array('status'=> false, 'msg'=> 'Gagal submit.'));
                 }
             } else {
                 return $this->res->json(array('status'=> false, 'msg'=> 'images is more than 6 or empty'));
