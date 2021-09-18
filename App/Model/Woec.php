@@ -112,11 +112,17 @@ class Woec extends Model {
     public function listClose(string $date, int $page, int $engginer) {
         $index = ($page - 1) * 20;
 
+        $date_parser = explode('-', $date);
+        $year = $date_parser[0];
+        $month = $date_parser[1];
+        
         $query = 'SELECT
             wo.id,
             dn.name AS devicename,
             db.name AS brandname,
-            cus.name AS customername
+            cus.name AS customername,
+            ass.model AS assetmodel,
+            ass.serial_number AS assetserialnumber
             FROM work_order_engginer_confirm AS woec
             INNER JOIN work_order AS wo ON wo.id = woec.work_order
             INNER JOIN assets AS ass ON ass.id = wo.asset
@@ -124,10 +130,10 @@ class Woec extends Model {
             INNER JOIN device_brand AS db ON db.id = ass.device_brand
             INNER JOIN customer AS cus ON cus.id = wo.customer
             INNER JOIN location AS loc ON loc.id = wo.location
-            WHERE DATE(wo.datecreated) = ? AND wo.engginer = ? AND woec.status = ?
+            WHERE YEAR(woec.datecreated) = ? AND MONTH(woec.datecreated) = ? AND woec.id_submit = ? AND woec.status = ?
             ORDER BY wo.datecreated DESC LIMIT '.$index.', 20';
-
-        $list_progress = $this->db->rawQueryType('select', $query, array($date, $engginer, 1));
+        
+        $list_progress = $this->db->rawQueryType('select', $query, array($year, $month, $engginer, 1));
 
         if($list_progress) {
             return array('status'=> true, 'data'=> $list_progress);
@@ -138,12 +144,18 @@ class Woec extends Model {
 
     public function listProgress(string $date, int $page, int $engginer) {
         $index = ($page - 1) * 20;
+        
+        $date_parser = explode('-', $date);
+        $year = $date_parser[0];
+        $month = $date_parser[1];
 
         $query = 'SELECT
             wo.id,
             dn.name AS devicename,
             db.name AS brandname,
-            cus.name AS customername
+            cus.name AS customername,
+            ass.model AS assetmodel,
+            ass.serial_number AS assetserialnumber
             FROM work_order_engginer_confirm AS woec
             INNER JOIN work_order AS wo ON wo.id = woec.work_order
             INNER JOIN assets AS ass ON ass.id = wo.asset
@@ -151,10 +163,10 @@ class Woec extends Model {
             INNER JOIN device_brand AS db ON db.id = ass.device_brand
             INNER JOIN customer AS cus ON cus.id = wo.customer
             INNER JOIN location AS loc ON loc.id = wo.location
-            WHERE DATE(wo.datecreated) = ? AND wo.engginer = ? AND woec.status = ?
+            WHERE YEAR(woec.datecreated) = ? AND MONTH(woec.datecreated) = ? AND woec.id_submit = ? AND woec.status = ?
             ORDER BY wo.datecreated DESC LIMIT '.$index.', 20';
 
-        $list_progress = $this->db->rawQueryType('select', $query, array($date, $engginer, 0));
+        $list_progress = $this->db->rawQueryType('select', $query, array($year, $month, (int)$engginer, 0));
 
         if($list_progress) {
             return array('status'=> true, 'data'=> $list_progress);
