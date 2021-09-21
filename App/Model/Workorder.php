@@ -133,9 +133,6 @@ class Workorder extends Model {
             WHERE DATE(wo.datecreated) = ? AND wo.engginer = ? AND wo.location = ? AND woec.work_order IS NULL
             ORDER BY wo.datecreated DESC LIMIT '.$index.', 20';
 
-        echo $query;
-        die();
-
         $list_works = $this->db->rawQueryType('select', $query, array($date, $engginer, $location));
 
         if($list_works) {
