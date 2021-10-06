@@ -5,7 +5,7 @@ use System\Controller as Controller;
 use App\Model\Admin as Admin;
 use App\Model\Leader as Leader;
 use App\Model\Backupleader as Backupleader;
-use App\Model\Engginer as Engginer;
+use App\Model\Engineer as Engineer;
 use App\Model\Log as Log;
 use App\Model\Asset as Asset;
 use App\Model\Brand as Brand;
@@ -168,7 +168,7 @@ class Api extends Controller {
                 } else if($type == 2) {
                     $this->loadModel('authentication', new Backupleader());
                 } else if($type == 3) {
-                    $this->loadModel('authentication', new Engginer());
+                    $this->loadModel('authentication', new Engineer());
                 } else {
                     return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
                 }
@@ -209,8 +209,8 @@ class Api extends Controller {
                 $this->loadModel('content', new Asset());
             } else if($model === 'condition') {
                 $this->loadModel('content', new Condition());
-            } else if($model === 'engginer') {
-                $this->loadModel('content', new Engginer());
+            } else if($model === 'engineer') {
+                $this->loadModel('content', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -248,8 +248,8 @@ class Api extends Controller {
                 $this->loadModel('content', new Backupleader());
             } else if($model === 'leader') {
                 $this->loadModel('content', new Leader());
-            } else if($model === 'engginer') {
-                $this->loadModel('content', new Engginer());
+            } else if($model === 'engineer') {
+                $this->loadModel('content', new Engineer());
             } else if($model === 'workorder') {
                 $this->loadModel('content', new WorkOrder());
             } else if($model === 'admin') {
@@ -362,8 +362,8 @@ class Api extends Controller {
                 $this->loadModel('content', new Backupleader());
             } else if($model === 'leader') {
                 $this->loadModel('content', new Leader());
-            } else if($model === 'engginer') {
-                $this->loadModel('content', new Engginer());
+            } else if($model === 'engineer') {
+                $this->loadModel('content', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -392,8 +392,8 @@ class Api extends Controller {
                 $this->loadModel('account', new Leader());
             } else if($model === 'backupleader') {
                 $this->loadModel('account', new Backupleader());
-            } else if($model === 'engginer') {
-                $this->loadModel('account', new Engginer());
+            } else if($model === 'engineer') {
+                $this->loadModel('account', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -432,8 +432,8 @@ class Api extends Controller {
                 $this->loadModel('account', new Leader());
             } else if($type === 'backupleader') {
                 $this->loadModel('account', new Backupleader());
-            } else if($type === 'engginer') {
-                $this->loadModel('account', new Engginer());
+            } else if($type === 'engineer') {
+                $this->loadModel('account', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -456,8 +456,8 @@ class Api extends Controller {
                 $this->loadModel('account', new Leader());
             } else if($model === 'backupleader') {
                 $this->loadModel('account', new Backupleader());
-            } else if($model === 'engginer') {
-                $this->loadModel('account', new Engginer());
+            } else if($model === 'engineer') {
+                $this->loadModel('account', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -483,8 +483,8 @@ class Api extends Controller {
                 $this->loadModel('account', new Leader());
             } else if($model === 'backupleader') {
                 $this->loadModel('account', new Backupleader());
-            } else if($model === 'engginer') {
-                $this->loadModel('account', new Engginer());
+            } else if($model === 'engineer') {
+                $this->loadModel('account', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -512,8 +512,8 @@ class Api extends Controller {
                 $this->loadModel('account', new Leader());
             } else if($model === 'backupleader') {
                 $this->loadModel('account', new Backupleader());
-            } else if($model === 'engginer') {
-                $this->loadModel('account', new Engginer());
+            } else if($model === 'engineer') {
+                $this->loadModel('account', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -684,14 +684,14 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'can not response this request.'));
     }
 
-    public function setengginer() {
+    public function setengineer() {
         if($this->req?->getMethod() === 'POST' && ($this->type === 1 || $this->type == 2)) {
             $wo_id          = (int) $this->req?->Post('idwo');
-            $engginer_id    = (int) $this->req?->Post('idengginer');
+            $engineer_id    = (int) $this->req?->Post('idengineer');
             
             $this->loadModel('wo', new Workorder());
 
-            $result = $this->wo->signEngginer($wo_id, $engginer_id);
+            $result = $this->wo->signEngineer($wo_id, $engineer_id);
 
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));
@@ -703,7 +703,7 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
     }
 
-    public function engginersubmitlist() {
+    public function engineersubmitlist() {
         if($this->req?->getMethod() === 'GET' && ($this->type === 1 || $this->type == 2)) {
             $this->loadModel('woec', new Woec());
 
@@ -740,16 +740,16 @@ class Api extends Controller {
         return $this->res->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
     }
 
-    // api for engginer
+    // api for engineer
 
-    public function listengginerworkorder() {
+    public function listengineerworkorder() {
         if($this->req?->getMethod() === 'GET' && $this->type === 3) {
             $dateselect = $this->req?->Get('date');
             $page       = $this->req?->Get('page');
 
             $this->loadModel('wo', new Workorder());
 
-            $result = $this->wo->listWorkOrderEngginer($dateselect, $page, $this->id, $this->location);
+            $result = $this->wo->listWorkOrderEngineer($dateselect, $page, $this->id, $this->location);
 
             if($result['status']) {
                 return $this->res->json(array('status'=> true, 'data'=> array('list'=> $result['data'])));
@@ -763,7 +763,7 @@ class Api extends Controller {
 
     public function listwoec($action) {
         if($this->req?->getMethod() === 'GET' && $this->type === 3) {
-            $id_engginer    = (int) $this->id;
+            $id_engineer    = (int) $this->id;
             
             $dateselect = $this->req?->Get('date');
             $page       = (int) $this->req?->Get('page');
@@ -773,9 +773,9 @@ class Api extends Controller {
             $result = null;
 
             if($action === 'progress') {
-                $result = $this->woec->listProgress($dateselect, $page, $id_engginer);
+                $result = $this->woec->listProgress($dateselect, $page, $id_engineer);
             } else if($action === 'close') {
-                $result = $this->woec->listClose($dateselect, $page, $id_engginer);
+                $result = $this->woec->listClose($dateselect, $page, $id_engineer);
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'Permintaan gagal.'));
             }
@@ -792,7 +792,7 @@ class Api extends Controller {
 
     public function submitwoec() {
         if($this->req?->getMethod() === 'POST' && $this->type === 3) {
-            $id_engginer    = (int) $this->id;
+            $id_engineer    = (int) $this->id;
             $id_work_order  = (int) $this->req?->Post('idwo');
             $descs = $this->req?->Post('desc');
 
@@ -829,7 +829,7 @@ class Api extends Controller {
                         }
                     }
                 }
-                $result = $this->woec->addWorkOrderConfirm($id_work_order, json_encode($images_uploads), $desc_list, $id_engginer);
+                $result = $this->woec->addWorkOrderConfirm($id_work_order, json_encode($images_uploads), $desc_list, $id_engineer);
 
                 if($result['status']) {
                     return $this->res->json(array('status'=> true, 'data'=> array('id'=> $result['id'])));
@@ -846,7 +846,7 @@ class Api extends Controller {
 
     public function updatewoec() {
         if($this->req?->getMethod() === 'POST' && $this->type === 3) {
-            $id_engginer    = (int) $this->id;
+            $id_engineer    = (int) $this->id;
             $id_work_order  = (int) $this->req?->Post('idwo');
             $descs = $this->req?->Post('desc');
             $desc_list = json_encode($descs);
@@ -882,7 +882,7 @@ class Api extends Controller {
                         }
                     }
                 }
-                $result = $this->woec->editWorkOrderConfirm($id_work_order, json_encode($images_uploads), $desc_list, $id_engginer);
+                $result = $this->woec->editWorkOrderConfirm($id_work_order, json_encode($images_uploads), $desc_list, $id_engineer);
 
                 if($result['status']) {
                     return $this->res->json(array('status'=> true, 'msg'=> $result['msg']));
@@ -1276,7 +1276,7 @@ class Api extends Controller {
             } else if($this->type === 2) {
                 $this->loadModel('profile', new Backupleader());
             } else if($this->type === 3) {
-                $this->loadModel('profile', new Engginer());
+                $this->loadModel('profile', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -1301,7 +1301,7 @@ class Api extends Controller {
             } else if($this->type === 2) {
                 $this->loadModel('profile', new Backupleader());
             } else if($this->type === 3) {
-                $this->loadModel('profile', new Engginer());
+                $this->loadModel('profile', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -1342,7 +1342,7 @@ class Api extends Controller {
             } else if($this->type === 2) {
                 $this->loadModel('profile', new Backupleader());
             } else if($this->type === 3) {
-                $this->loadModel('profile', new Engginer());
+                $this->loadModel('profile', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
@@ -1370,7 +1370,7 @@ class Api extends Controller {
             } else if($this->type === 2) {
                 $this->loadModel('profile', new Backupleader());
             } else if($this->type === 3) {
-                $this->loadModel('profile', new Engginer());
+                $this->loadModel('profile', new Engineer());
             } else {
                 return $this->res?->json(array('status'=> false, 'msg'=> 'cannot response this request.'));
             }
