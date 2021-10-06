@@ -172,7 +172,7 @@ class Workorder extends Model {
 
     public function detailWO(int $id) {
         $query = 'SELECT
-                woec.id AS engginer_submit_id,
+                woec.id AS engineer_submit_id,
                 wo.id AS work_order_id,
                 ass.id AS asset_id,
                 dn.name AS devicename,
