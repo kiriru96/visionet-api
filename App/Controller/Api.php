@@ -193,8 +193,6 @@ class Api extends Controller {
     // light search data
     public function light($model) {
         if($this->req?->getMethod() === 'GET') {
-            header('Cache-Control: max-age=30');
-
             if($model === 'device') {
                 $this->loadModel('content', new Device());
             } else if($model === 'brand') {
@@ -1020,8 +1018,6 @@ class Api extends Controller {
 
     public function searchasset() {
         if($this->req?->getMethod() === 'GET') {
-            header('Cache-Control: max-age=30');
-
             $search = $this->req?->Get('search');
 
             $this->loadModel('asset', new Asset());
