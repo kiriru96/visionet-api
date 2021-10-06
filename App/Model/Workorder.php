@@ -51,14 +51,14 @@ class Workorder extends Model {
         }
     }
 
-    public function signEngginer(int $id_work_order, int $id_engginer) {
+    public function signEngineer(int $id_work_order, int $id_engineer) {
         $fields = array('engginer');
-        $values = array($id_engginer);
+        $values = array($id_engineer);
 
-        $update_engginer_wo = $this->db->update('work_order', $fields, $values, 'id = '.$id_work_order);
+        $update_engineer_wo = $this->db->update('work_order', $fields, $values, 'id = '.$id_work_order);
 
-        if($update_engginer_wo) {
-            return array('status'=> true, 'msg'=> 'berhasil mengirim ke engginer.');
+        if($update_engineer_wo) {
+            return array('status'=> true, 'msg'=> 'berhasil mengirim ke engineer.');
         } else {
             return array('status'=> false, 'msg'=> 'gagal, ulangi pengiriman data.');
         }
@@ -115,7 +115,7 @@ class Workorder extends Model {
         }
     }
 
-    public function listWorkOrderEngginer(string $date, int $page, int $engginer, int $location) {
+    public function listWorkOrderEngineer(string $date, int $page, int $engineer, int $location) {
         $index = ($page - 1) * 20;
 
         $query = 'SELECT
@@ -133,7 +133,7 @@ class Workorder extends Model {
             WHERE DATE(wo.datecreated) = ? AND wo.engginer = ? AND wo.location = ? AND woec.work_order IS NULL
             ORDER BY wo.datecreated DESC LIMIT '.$index.', 20';
 
-        $list_works = $this->db->rawQueryType('select', $query, array($date, $engginer, $location));
+        $list_works = $this->db->rawQueryType('select', $query, array($date, $engineer, $location));
 
         if($list_works) {
             return array('status'=> true, 'data'=> $list_works);

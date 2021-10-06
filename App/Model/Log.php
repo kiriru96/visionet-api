@@ -33,21 +33,21 @@ class Log extends Model {
 
         $this->insertLog($type, $id, $description);
     }
-    // create log when engginer login
-    public function signLogLoginEngginer(int $type, int $id, string $username) {
+    // create log when engineer login
+    public function signLogLoginEngineer(int $type, int $id, string $username) {
         $description = 'Admin Login: '.$username;
 
         $this->insertLog($type, $id, $description);
     }
-    // create log when engginer post work order
-    public function signEngginerWOPost(int $id, int $id_wo) {
+    // create log when engineer post work order
+    public function signEngineerWOPost(int $id, int $id_wo) {
 
     }
-    // create log when leader send wo to engginer
+    // create log when leader send wo to engineer
     public function signLogLeaderSendWO(int $id, int $id_wo) {
 
     }
-    // create log when backup leader send wo to engginer
+    // create log when backup leader send wo to engineer
     public function signLogBackupLeaderSendWO(int $id, int $id_wo) {
 
     }

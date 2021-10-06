@@ -1,5 +1,5 @@
 <?php
-// Woec = Work Order Engginer Confirm
+// Woec = Work Order Engineer Confirm
 
 namespace App\Model;
 use System\Model as Model;
@@ -109,7 +109,7 @@ class Woec extends Model {
         }
     }
 
-    public function listClose(string $date, int $page, int $engginer) {
+    public function listClose(string $date, int $page, int $engineer) {
         $index = ($page - 1) * 20;
 
         $date_parser = explode('-', $date);
@@ -133,7 +133,7 @@ class Woec extends Model {
             WHERE YEAR(woec.datecreated) = ? AND MONTH(woec.datecreated) = ? AND woec.id_submit = ? AND woec.status = ?
             ORDER BY wo.datecreated DESC LIMIT '.$index.', 20';
         
-        $list_progress = $this->db->rawQueryType('select', $query, array($year, $month, $engginer, 1));
+        $list_progress = $this->db->rawQueryType('select', $query, array($year, $month, $engineer, 1));
 
         if($list_progress) {
             return array('status'=> true, 'data'=> $list_progress);
@@ -142,7 +142,7 @@ class Woec extends Model {
         }
     }
 
-    public function listProgress(string $date, int $page, int $engginer) {
+    public function listProgress(string $date, int $page, int $engineer) {
         $index = ($page - 1) * 20;
         
         $date_parser = explode('-', $date);
@@ -166,7 +166,7 @@ class Woec extends Model {
             WHERE YEAR(woec.datecreated) = ? AND MONTH(woec.datecreated) = ? AND woec.id_submit = ? AND woec.status = ?
             ORDER BY wo.datecreated DESC LIMIT '.$index.', 20';
 
-        $list_progress = $this->db->rawQueryType('select', $query, array($year, $month, (int)$engginer, 0));
+        $list_progress = $this->db->rawQueryType('select', $query, array($year, $month, (int)$engineer, 0));
 
         if($list_progress) {
             return array('status'=> true, 'data'=> $list_progress);
